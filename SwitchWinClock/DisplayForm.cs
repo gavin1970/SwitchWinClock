@@ -118,7 +118,6 @@ namespace SwitchWinClock
                 this.Top = (Screen.GetWorkingArea(this).Height / 2) - (this.Height / 2);    //center screen
             else
                 this.Top = config.FormLocation.Y;
-            //this.Top = 0;
         }
         private void RefreshForm()
         {
@@ -178,19 +177,6 @@ namespace SwitchWinClock
                 futureDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second + 1);   //strips milliseconds
             }
             
-            ////This became a problem, unless I decide to thread 
-            ////off this method.  Even then, syncing it with the deploy 
-            ////if it was already running, could still be a problem.
-            ////I would need to change wait timer to Next Display Date/Time to resolve.
-            
-            //else
-            //{
-            //    waitTimer = 60000;
-            //    RefreshForm();
-
-            //    futureDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute + 1, 0);   //strip seconds and milliseconds
-            //}
-
             TimeSpan diff = futureDate.Subtract(now);
             //wait to set on exact millisecond
             WaitHandle.WaitAny(SWCEvents, diff);

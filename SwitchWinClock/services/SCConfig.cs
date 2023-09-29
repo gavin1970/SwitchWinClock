@@ -7,7 +7,7 @@ using System.Drawing.Design;
 
 namespace SwitchWinClock
 {
-    [Editor("System.Drawing.Design.ContentAlignmentEditor, System.Drawing.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
+    //[Editor("System.Drawing.Design.ContentAlignmentEditor, System.Drawing.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
     public enum Clock_Style
     {
         Border = 0,
@@ -19,7 +19,7 @@ namespace SwitchWinClock
         const string SETTINGS_TABLE = "Settings";
         private static JSONData _jSON;
         private static DataTable _DataTable = new DataTable();
-
+        private SLog Log = new SLog();
         private Clock_Style _ClockStyle = Clock_Style.Depth;
         private string _DateFormat = "dddd, MMM dd, hh:mm:ss tt";
         private Point _FormLocation = new Point(0, 0);
@@ -40,18 +40,117 @@ namespace SwitchWinClock
                 Update();   //will create table and add 1 record based on default.
             else if (_DataTable?.Rows.Count > 0)
                 LoadData(); //load what exists in config.  First row only, just in case of error of more than one record.
+
+            //startup log location.
+            Log.WriteLine(SMsgType.Information, $"[ColNames.FormLocation] = {_FormLocation}");
         }
 
-        public Clock_Style ClockStyle { get { return _ClockStyle; } set { _ClockStyle = value; Update(); } }
-        public string DateFormat { get { return _DateFormat; } set { _DateFormat = value; Update(); } }
-        public Point FormLocation { get { return _FormLocation; } set { _FormLocation = value; Update(); } }
-        public Font Font { get { return _Font; } set { _Font = value; Update(); } }
-        public int TextBorderDepth { get { return _TextBorderDepth; } set { _TextBorderDepth = value; Update(); } }
-        public Color ForeColor { get { return _ForeColor; } set { _ForeColor = value; Update(); } }
-        public Color BackColor { get { return _BackColor; } set { _BackColor = value; Update(); } }
-        public Color FormBorderColor { get { return _FormBorderColor; } set { _FormBorderColor = value; Update(); } }
-        public Color TextBorderColor { get { return _TextBorderColor; } set { _TextBorderColor = value; Update(); } }
-        public ContentAlignment TextAlignment { get { return _TextAlignment; } set { TextAlignment = value; Update(); } }
+        ~SCConfig()
+        {
+            //shutdown log location.
+            Log.WriteLine(SMsgType.Information, $"[ColNames.FormLocation] = {_FormLocation}");
+        }
+
+        public Clock_Style ClockStyle 
+        { 
+            get { return _ClockStyle; } 
+            set { 
+                _ClockStyle = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.ClockStyle] = {(int)_ClockStyle}");
+                Update(); 
+            }
+        }
+        public string DateFormat 
+        { 
+            get { return _DateFormat; }
+            set
+            {
+                _DateFormat = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.DateFormat] = {_DateFormat}");
+                Update();
+            }
+        }
+        public Point FormLocation
+        {
+            get { return _FormLocation; }
+            set
+            {
+                _FormLocation = value;
+                //dont log location, because this will spam the log with cords.
+                //It's locked on start and closing of this class.
+                Update();
+            }
+        }
+        public Font Font
+        {
+            get { return _Font; }
+            set
+            {
+                _Font = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.Font] = {_Font}");
+                Update();
+            }
+        }
+        public int TextBorderDepth
+        {
+            get { return _TextBorderDepth; }
+            set
+            {
+                _TextBorderDepth = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.TextBorderDepth] = {_TextBorderDepth}");
+                Update();
+            }
+        }
+        public Color ForeColor
+        {
+            get { return _ForeColor; }
+            set
+            {
+                _ForeColor = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.ForeColor] = {_jSON.ColorToInt(_ForeColor)}");
+                Update();
+            }
+        }
+        public Color BackColor
+        {
+            get { return _BackColor; }
+            set
+            {
+                _BackColor = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.BackColor] = {_jSON.ColorToInt(_BackColor)}");
+                Update();
+            }
+        }
+        public Color FormBorderColor
+        {
+            get { return _FormBorderColor; }
+            set
+            {
+                _FormBorderColor = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.FormBorderColor] = {_jSON.ColorToInt(_FormBorderColor)}");
+                Update();
+            }
+        }
+        public Color TextBorderColor
+        {
+            get { return _TextBorderColor; }
+            set
+            {
+                _TextBorderColor = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.TextBorderColor] = {_jSON.ColorToInt(_TextBorderColor)}");
+                Update();
+            }
+        }
+        public ContentAlignment TextAlignment
+        {
+            get { return _TextAlignment; }
+            set
+            {
+                TextAlignment = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.TextAlignment] = {_TextAlignment}");
+                Update();
+            }
+        }
         private void LoadData()
         {
             foreach(DataRow dRow in _DataTable.Rows)
@@ -80,6 +179,7 @@ namespace SwitchWinClock
         }
         private void Update()
         {
+            Log.WriteLine(SMsgType.Debug, "Update called...");
             DataRow dRow;
 
             if (_DataTable == null)
@@ -112,9 +212,11 @@ namespace SwitchWinClock
                 _DataTable.Rows.Add(dRow);  //add record to table.
 
             _jSON.UpdateTable(_DataTable);
+            Log.WriteLine(SMsgType.Debug, "Update Complete...");
         }
         private void CreateDataTable()
         {
+            Log.WriteLine(SMsgType.Information, $"Creating table: {SETTINGS_TABLE}{Global.AppID}...");
             _DataTable = new DataTable($"{SETTINGS_TABLE}{Global.AppID}");
             _DataTable.Columns.Add(new DataColumn(ColNames.ClockStyle, typeof(Clock_Style)));
             _DataTable.Columns.Add(new DataColumn(ColNames.DateFormat, typeof(string)));
@@ -126,6 +228,7 @@ namespace SwitchWinClock
             _DataTable.Columns.Add(new DataColumn(ColNames.FormBorderColor, typeof(int)));
             _DataTable.Columns.Add(new DataColumn(ColNames.TextBorderColor, typeof(int)));
             _DataTable.Columns.Add(new DataColumn(ColNames.TextAlignment, typeof(ContentAlignment)));
+            Log.WriteLine(SMsgType.Information, $"Created table: {SETTINGS_TABLE}{Global.AppID}...");
         }
     }
 }

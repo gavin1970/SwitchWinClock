@@ -84,6 +84,7 @@
     <Compile Include="utils\Constants.cs" />
     <Compile Include="utils\FontObject.cs" />
     <Compile Include="utils\Global.cs" />
+    <Compile Include="utils\SLog.cs" />
     <EmbeddedResource Include="DisplayForm.resx">
       <DependentUpon>DisplayForm.cs</DependentUpon>
     </EmbeddedResource>
