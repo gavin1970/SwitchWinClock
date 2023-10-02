@@ -517,19 +517,19 @@ namespace SwitchWinClock
             {
                 fontDialog.ShowApply = true;
                 fontDialog.Apply += FontApply;
+                fontDialog.ShowColor = true;
                 fontDialog.Font = config.Font;
+                fontDialog.Color = config.ForeColor;
+
                 if (fontDialog.ShowDialog() == DialogResult.OK)
-                {
                     FontApply(fontDialog, e);
-                    //this.Size = new Size(10, 10);
-                    //config.Font = fontDialog.Font;
-                }
             }
         }
         private void FontApply(object sender, EventArgs e)
         {
             var fd = sender as FontDialog;
             config.Font = fd.Font;
+            config.ForeColor = fd.Color;
         }
         private void TextDepthp_Click(object sender, EventArgs e)
         {
