@@ -69,9 +69,9 @@ namespace SwitchWinClock
             this.toolStripMenuItem8 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem9 = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.ExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.NewInstanceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.ExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SettingsContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -88,7 +88,7 @@ namespace SwitchWinClock
             this.toolStripSeparator2,
             this.ExitMenuItem});
             this.SettingsContextMenu.Name = "SettingsContextMenu";
-            this.SettingsContextMenu.Size = new System.Drawing.Size(181, 192);
+            this.SettingsContextMenu.Size = new System.Drawing.Size(157, 170);
             this.SettingsContextMenu.MouseLeave += new System.EventHandler(this.Menu_MouseLeave);
             // 
             // ClockStyleMenuItem
@@ -97,7 +97,7 @@ namespace SwitchWinClock
             this.StyleDeptMenuItem,
             this.StyleBorderMenuItem});
             this.ClockStyleMenuItem.Name = "ClockStyleMenuItem";
-            this.ClockStyleMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ClockStyleMenuItem.Size = new System.Drawing.Size(156, 22);
             this.ClockStyleMenuItem.Text = "Clock &Style";
             // 
             // StyleDeptMenuItem
@@ -121,7 +121,7 @@ namespace SwitchWinClock
             // FontSetupMenuItem
             // 
             this.FontSetupMenuItem.Name = "FontSetupMenuItem";
-            this.FontSetupMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.FontSetupMenuItem.Size = new System.Drawing.Size(156, 22);
             this.FontSetupMenuItem.Text = "&Font Settings";
             this.FontSetupMenuItem.Click += new System.EventHandler(this.FontSetupMenuItem_Click);
             // 
@@ -134,7 +134,7 @@ namespace SwitchWinClock
             this.PresetDateFormatItem3,
             this.PresetDateFormatItem4});
             this.DateFormattingMenuItem.Name = "DateFormattingMenuItem";
-            this.DateFormattingMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.DateFormattingMenuItem.Size = new System.Drawing.Size(156, 22);
             this.DateFormattingMenuItem.Text = "&Date Formating";
             // 
             // CustomDateFormatMenuItem
@@ -188,7 +188,7 @@ namespace SwitchWinClock
             this.BorderColorMenuItem,
             this.TextBorderColorMenuItem});
             this.ColorSetupMenuItem.Name = "ColorSetupMenuItem";
-            this.ColorSetupMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ColorSetupMenuItem.Size = new System.Drawing.Size(156, 22);
             this.ColorSetupMenuItem.Text = "&Color Settings";
             // 
             // ForeColorMenuItem
@@ -197,13 +197,13 @@ namespace SwitchWinClock
             this.ForeColorSetMenuItem,
             this.ForeColorTransparentMenuItem});
             this.ForeColorMenuItem.Name = "ForeColorMenuItem";
-            this.ForeColorMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.ForeColorMenuItem.Size = new System.Drawing.Size(180, 22);
             this.ForeColorMenuItem.Text = "&ForeColor";
             // 
             // ForeColorSetMenuItem
             // 
             this.ForeColorSetMenuItem.Name = "ForeColorSetMenuItem";
-            this.ForeColorSetMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.ForeColorSetMenuItem.Size = new System.Drawing.Size(180, 22);
             this.ForeColorSetMenuItem.Text = "&Set Color";
             this.ForeColorSetMenuItem.Click += new System.EventHandler(this.ForeColorSetMenuItem_Click);
             // 
@@ -211,7 +211,7 @@ namespace SwitchWinClock
             // 
             this.ForeColorTransparentMenuItem.CheckOnClick = true;
             this.ForeColorTransparentMenuItem.Name = "ForeColorTransparentMenuItem";
-            this.ForeColorTransparentMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.ForeColorTransparentMenuItem.Size = new System.Drawing.Size(180, 22);
             this.ForeColorTransparentMenuItem.Text = "&Make Transparent";
             this.ForeColorTransparentMenuItem.Click += new System.EventHandler(this.ColorTransparentMenuItem_Click);
             // 
@@ -221,7 +221,7 @@ namespace SwitchWinClock
             this.BackColorSetMenuItem,
             this.BackColorTransparentMenuItem});
             this.BackColorMenuItem.Name = "BackColorMenuItem";
-            this.BackColorMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.BackColorMenuItem.Size = new System.Drawing.Size(180, 22);
             this.BackColorMenuItem.Text = "Form B&ackColor";
             // 
             // BackColorSetMenuItem
@@ -245,7 +245,7 @@ namespace SwitchWinClock
             this.BorderColorSetMenuItem,
             this.BorderColorTransparentMenuItem});
             this.BorderColorMenuItem.Name = "BorderColorMenuItem";
-            this.BorderColorMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.BorderColorMenuItem.Size = new System.Drawing.Size(180, 22);
             this.BorderColorMenuItem.Text = "Form B&order Color";
             // 
             // BorderColorSetMenuItem
@@ -269,7 +269,7 @@ namespace SwitchWinClock
             this.TextBorderSetColorMenuItem,
             this.TextBorderTransparentMenuItem});
             this.TextBorderColorMenuItem.Name = "TextBorderColorMenuItem";
-            this.TextBorderColorMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.TextBorderColorMenuItem.Size = new System.Drawing.Size(180, 22);
             this.TextBorderColorMenuItem.Text = "&Text Border Color";
             // 
             // TextBorderSetColorMenuItem
@@ -300,7 +300,7 @@ namespace SwitchWinClock
             this.toolStripMenuItem8,
             this.toolStripMenuItem9});
             this.TextDepthpMenuItem.Name = "TextDepthpMenuItem";
-            this.TextDepthpMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.TextDepthpMenuItem.Size = new System.Drawing.Size(156, 22);
             this.TextDepthpMenuItem.Text = "&Text Depth";
             // 
             // toolStripMenuItem1
@@ -378,33 +378,33 @@ namespace SwitchWinClock
             // ToolStripSeparator1
             // 
             this.ToolStripSeparator1.Name = "ToolStripSeparator1";
-            this.ToolStripSeparator1.Size = new System.Drawing.Size(177, 6);
-            // 
-            // ExitMenuItem
-            // 
-            this.ExitMenuItem.Name = "ExitMenuItem";
-            this.ExitMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.ExitMenuItem.Text = "E&xit";
-            this.ExitMenuItem.Click += new System.EventHandler(this.ExitMenuItem_Click);
+            this.ToolStripSeparator1.Size = new System.Drawing.Size(153, 6);
             // 
             // NewInstanceMenuItem
             // 
             this.NewInstanceMenuItem.Name = "NewInstanceMenuItem";
-            this.NewInstanceMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.NewInstanceMenuItem.Size = new System.Drawing.Size(156, 22);
             this.NewInstanceMenuItem.Text = "&New Instance";
             this.NewInstanceMenuItem.Click += new System.EventHandler(this.NewInstanceMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(153, 6);
+            // 
+            // ExitMenuItem
+            // 
+            this.ExitMenuItem.Name = "ExitMenuItem";
+            this.ExitMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.ExitMenuItem.Text = "E&xit";
+            this.ExitMenuItem.Click += new System.EventHandler(this.ExitMenuItem_Click);
             // 
             // DisplayForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(254)))));
-            this.ClientSize = new System.Drawing.Size(1276, 142);
+            this.ClientSize = new System.Drawing.Size(234, 65);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));

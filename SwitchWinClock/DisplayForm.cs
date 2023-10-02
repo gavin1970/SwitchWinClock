@@ -515,13 +515,21 @@ namespace SwitchWinClock
         {
             using (FontDialog fontDialog = new FontDialog())
             {
+                fontDialog.ShowApply = true;
+                fontDialog.Apply += FontApply;
                 fontDialog.Font = config.Font;
                 if (fontDialog.ShowDialog() == DialogResult.OK)
                 {
+                    FontApply(fontDialog, e);
                     //this.Size = new Size(10, 10);
-                    config.Font = fontDialog.Font;
+                    //config.Font = fontDialog.Font;
                 }
             }
+        }
+        private void FontApply(object sender, EventArgs e)
+        {
+            var fd = sender as FontDialog;
+            config.Font = fd.Font;
         }
         private void TextDepthp_Click(object sender, EventArgs e)
         {
