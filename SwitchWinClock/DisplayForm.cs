@@ -18,7 +18,6 @@ namespace SwitchWinClock
         private FontObject fontObject;
         private SCConfig config = new SCConfig();
         private static bool closingForm = false;
-        private static DateTime mouseMoved = DateTime.MinValue;
         private int waitTimer = 60000;  //default: 1 min
 
         public DisplayForm()
@@ -344,10 +343,6 @@ namespace SwitchWinClock
 
                 g.DrawString(dt, ft, new SolidBrush(fColor), new Rectangle(depth, depth, sz.Width, sz.Height), sFormat);
             }
-
-            if (mouseMoved > DateTime.Now)
-                DrawCloseButton(g, sFormat);
-
         }
         private void CanvasPaint(PaintEventArgs e)
         {
@@ -469,25 +464,10 @@ namespace SwitchWinClock
                 config.FormLocation = p3;
                 this.Location = p3;
             }
-            else
-            {
-                mouseMoved = DateTime.Now.AddSeconds(5);
-                if (e.X > this.Width - 25 && e.Y < 25)
-                    Cursor = Cursors.Hand;
-                else
-                    Cursor = Cursors.Default;
-            }
         }
         private void Form_MouseClick(object sender, MouseEventArgs e)
         {
-            if(e.Button == MouseButtons.Left)
-            {
-                if (e.X > this.Width - 25 && e.Y < 25)
-                {
-                    this.Close();
-                }
-            }
-            else
+            if (e.Button == MouseButtons.Right)
             {
                 Point pt = new Point(e.X + this.Left, e.Y + this.Top);
                 SettingsContextMenu.Show(pt);
@@ -650,6 +630,8 @@ namespace SwitchWinClock
             this.TextDepthpMenuItem.Text = "&Text Depth";
             config.ClockStyle = Clock_Style.Depth;
             StyleBorderMenuItem.Checked = false;
+            if (!StyleDeptMenuItem.Checked)
+                StyleDeptMenuItem.Checked = true;
             TextBorderColorMenuItem.Visible = false;
         }
         private void StyleBorderMenuItem_Click(object sender, EventArgs e)
@@ -657,6 +639,8 @@ namespace SwitchWinClock
             this.TextDepthpMenuItem.Text = "&Text Border";
             config.ClockStyle = Clock_Style.Border;
             StyleDeptMenuItem.Checked = false;
+            if(!StyleBorderMenuItem.Checked)
+                StyleBorderMenuItem.Checked = true;
             TextBorderColorMenuItem.Visible = true;
         }
         private void TextBorderSetColorMenuItem_Click(object sender, EventArgs e)

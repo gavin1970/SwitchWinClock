@@ -105,7 +105,7 @@ namespace SwitchWinClock
             this.StyleDeptMenuItem.CheckOnClick = true;
             this.StyleDeptMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.StyleDeptMenuItem.Name = "StyleDeptMenuItem";
-            this.StyleDeptMenuItem.Size = new System.Drawing.Size(109, 22);
+            this.StyleDeptMenuItem.Size = new System.Drawing.Size(180, 22);
             this.StyleDeptMenuItem.Text = "&Depth";
             this.StyleDeptMenuItem.Click += new System.EventHandler(this.StyleDeptMenuItem_Click);
             // 
@@ -114,7 +114,7 @@ namespace SwitchWinClock
             this.StyleBorderMenuItem.CheckOnClick = true;
             this.StyleBorderMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.StyleBorderMenuItem.Name = "StyleBorderMenuItem";
-            this.StyleBorderMenuItem.Size = new System.Drawing.Size(109, 22);
+            this.StyleBorderMenuItem.Size = new System.Drawing.Size(180, 22);
             this.StyleBorderMenuItem.Text = "&Border";
             this.StyleBorderMenuItem.Click += new System.EventHandler(this.StyleBorderMenuItem_Click);
             // 
@@ -197,13 +197,13 @@ namespace SwitchWinClock
             this.ForeColorSetMenuItem,
             this.ForeColorTransparentMenuItem});
             this.ForeColorMenuItem.Name = "ForeColorMenuItem";
-            this.ForeColorMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ForeColorMenuItem.Size = new System.Drawing.Size(172, 22);
             this.ForeColorMenuItem.Text = "&ForeColor";
             // 
             // ForeColorSetMenuItem
             // 
             this.ForeColorSetMenuItem.Name = "ForeColorSetMenuItem";
-            this.ForeColorSetMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ForeColorSetMenuItem.Size = new System.Drawing.Size(167, 22);
             this.ForeColorSetMenuItem.Text = "&Set Color";
             this.ForeColorSetMenuItem.Click += new System.EventHandler(this.ForeColorSetMenuItem_Click);
             // 
@@ -211,7 +211,7 @@ namespace SwitchWinClock
             // 
             this.ForeColorTransparentMenuItem.CheckOnClick = true;
             this.ForeColorTransparentMenuItem.Name = "ForeColorTransparentMenuItem";
-            this.ForeColorTransparentMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ForeColorTransparentMenuItem.Size = new System.Drawing.Size(167, 22);
             this.ForeColorTransparentMenuItem.Text = "&Make Transparent";
             this.ForeColorTransparentMenuItem.Click += new System.EventHandler(this.ColorTransparentMenuItem_Click);
             // 
@@ -221,7 +221,7 @@ namespace SwitchWinClock
             this.BackColorSetMenuItem,
             this.BackColorTransparentMenuItem});
             this.BackColorMenuItem.Name = "BackColorMenuItem";
-            this.BackColorMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.BackColorMenuItem.Size = new System.Drawing.Size(172, 22);
             this.BackColorMenuItem.Text = "Form B&ackColor";
             // 
             // BackColorSetMenuItem
@@ -245,7 +245,7 @@ namespace SwitchWinClock
             this.BorderColorSetMenuItem,
             this.BorderColorTransparentMenuItem});
             this.BorderColorMenuItem.Name = "BorderColorMenuItem";
-            this.BorderColorMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.BorderColorMenuItem.Size = new System.Drawing.Size(172, 22);
             this.BorderColorMenuItem.Text = "Form B&order Color";
             // 
             // BorderColorSetMenuItem
@@ -269,7 +269,7 @@ namespace SwitchWinClock
             this.TextBorderSetColorMenuItem,
             this.TextBorderTransparentMenuItem});
             this.TextBorderColorMenuItem.Name = "TextBorderColorMenuItem";
-            this.TextBorderColorMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.TextBorderColorMenuItem.Size = new System.Drawing.Size(172, 22);
             this.TextBorderColorMenuItem.Text = "&Text Border Color";
             // 
             // TextBorderSetColorMenuItem
