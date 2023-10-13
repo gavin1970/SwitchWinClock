@@ -24,6 +24,7 @@ namespace SwitchWinClock.utils
         public const string ManualWinAlignment = "ManualWinAlignment";
         public const string WinAlignment = "WinAlignment";
         public const string DeviceNumber = "DeviceNumber";
+        public const string AlwaysOnTop = "AlwaysOnTop";
         internal static FieldInfo[] GetFields
         { 
             get 

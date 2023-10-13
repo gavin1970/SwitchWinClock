@@ -34,6 +34,7 @@ namespace SwitchWinClock
         private ContentAlignment _WinAlignment = ContentAlignment.TopCenter;
         private bool _ManualWinAlignment = true;
         private int _DeviceNumber = 1;
+        private bool _AlwaysOnTop = false;
 
         public SCConfig() 
         {
@@ -185,6 +186,16 @@ namespace SwitchWinClock
                 Update();
             }
         }
+        public bool AlwaysOnTop
+        {
+            get { return _AlwaysOnTop; }
+            set
+            {
+                _AlwaysOnTop = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.AlwaysOnTop] = {_AlwaysOnTop}");
+                Update();
+            }
+        }
         private void LoadData()
         {
             if(!ValidColums())
@@ -205,6 +216,7 @@ namespace SwitchWinClock
                 _ManualWinAlignment = _jSON.GetColumn<bool>(dRow, ColNames.ManualWinAlignment, _ManualWinAlignment);
                 _WinAlignment = _jSON.GetColumn<ContentAlignment>(dRow, ColNames.WinAlignment, _WinAlignment);
                 _DeviceNumber = _jSON.GetColumn<int>(dRow, ColNames.DeviceNumber, _DeviceNumber);
+                _AlwaysOnTop = _jSON.GetColumn<bool>(dRow, ColNames.AlwaysOnTop, _AlwaysOnTop);
             }
 
             /*
@@ -271,6 +283,7 @@ namespace SwitchWinClock
             dRow[ColNames.ManualWinAlignment] = _ManualWinAlignment;
             dRow[ColNames.WinAlignment] = _WinAlignment;
             dRow[ColNames.DeviceNumber] = _DeviceNumber;
+            dRow[ColNames.AlwaysOnTop] = _AlwaysOnTop;
 
             if (_DataTable.Rows.Count == 0)
                 _DataTable.Rows.Add(dRow);  //add record to table.
@@ -309,6 +322,8 @@ namespace SwitchWinClock
                 _DataTable.Columns.Add(new DataColumn(ColNames.WinAlignment, typeof(ContentAlignment)));
             if (!_DataTable.Columns.Contains(ColNames.DeviceNumber))
                 _DataTable.Columns.Add(new DataColumn(ColNames.DeviceNumber, typeof(int)));
+            if (!_DataTable.Columns.Contains(ColNames.AlwaysOnTop))
+                _DataTable.Columns.Add(new DataColumn(ColNames.AlwaysOnTop, typeof(bool)));
             Log.WriteLine(SMsgType.Information, $"Created table: {SETTINGS_TABLE}{Global.AppID}...");
         }
         private bool ValidColums()

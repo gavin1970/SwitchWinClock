@@ -13,14 +13,14 @@ namespace SwitchWinClock
     public partial class DisplayForm : Form
     {
         delegate void VoidDelegate();
+        private static bool m_closingForm = false;
 
         private readonly Font ButtonFont = new Font("Arial Black", 10F, FontStyle.Regular, GraphicsUnit.Pixel);
         private readonly SCConfig config = new SCConfig();
         private readonly Screen[] m_allScreens = Screen.AllScreens;
 
-        private FontObject fontObject;
-        private static bool closingForm = false;
-        private int waitTimer = 60000;  //default: 1 min
+        private FontObject m_fontObject;
+        private int m_waitTimer = 60000;  //default: 1 min
 
         public DisplayForm()
         {
@@ -185,7 +185,7 @@ namespace SwitchWinClock
             }
             else if (!Disposing && !IsDisposed)
             {
-                if (closingForm)
+                if (m_closingForm)
                     return;
 
                 if(!this.Drag)
@@ -200,67 +200,55 @@ namespace SwitchWinClock
 
             SetWaitTimer();
 
-            while (iEvent != EventTypes.EVENT_SHUTDOWN && !closingForm)
+            while (iEvent != EventTypes.EVENT_SHUTDOWN && !m_closingForm)
             {
                 RefreshForm();
-                iEvent = WaitHandle.WaitAny(SWCEvents, waitTimer);
+                iEvent = WaitHandle.WaitAny(SWCEvents, m_waitTimer);
             }
         }
+        /// <summary>
+        /// Attempting to get the to the closes millisecond to the next second as possible based on format.
+        /// </summary>
         private void SetWaitTimer()
         {
             if (SWCEvents == null)
                 return;
 
-            DateTime now = DateTime.Now;
-            DateTime futureDate = now;  //default is identical
+            string date = DateTime.Now.AddSeconds(1).ToString("yyyy-MM-dd HH:mm:ss");
+            if(!DateTime.TryParse(date, out DateTime futreDate))
+                futreDate = DateTime.Now;
 
             if (config.DateFormat?.IndexOf("fff") > -1)
-                waitTimer = 1;
+                m_waitTimer = 1;
             else if (config.DateFormat?.IndexOf("ff") > -1)
-                waitTimer = 10;
+                m_waitTimer = 10;
             else if (config.DateFormat?.IndexOf("f") > -1)
-                waitTimer = 100;
-            else //if (config.DateFormat?.IndexOf("ss") > -1)
-            {
-                int sec = now.Second <= 59 ? now.Second + 1 : now.Second;
+                m_waitTimer = 100;
+            else
+                m_waitTimer = 1000;
 
-                waitTimer = 1000;
-                RefreshForm();
-                futureDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, sec);   //strips milliseconds
-            }
-            
-            TimeSpan diff = futureDate.Subtract(now);
+            TimeSpan diff = futreDate.Subtract(DateTime.Now);
             //wait to set on exact millisecond
             WaitHandle.WaitAny(SWCEvents, diff);
+            //refresh ui.
+            RefreshForm();
             //make sure, what ever might be on hold, resets based on new waitTimer
             SWCEvents[EventTypes.EVENT_MANUAL].Set();
         }
         private void SetupMenuChecks()
         {
             if (config.ClockStyle == Clock_Style.Depth)
-                StyleDeptMenuItem_Click(null, null);
+                this.StyleDeptMenuItem_Click(null, null);
             else
-                StyleBorderMenuItem_Click(null, null);
+                this.StyleBorderMenuItem_Click(null, null);
 
-            if (config.BackColor.A == 0)
-                BackColorTransparentMenuItem.Checked = true;
-            else
-                BackColorTransparentMenuItem.Checked = false;
+            this.BackColorTransparentMenuItem.Checked = config.BackColor.A == 0;
+            this.BorderColorTransparentMenuItem.Checked = config.FormBorderColor.A == 0;
+            this.ForeColorTransparentMenuItem.Checked = config.ForeColor.A == 0;
+            this.TextBorderTransparentMenuItem.Checked = config.TextBorderColor.A == 0;
 
-            if (config.FormBorderColor.A == 0)
-                BorderColorTransparentMenuItem.Checked = true;
-            else
-                BorderColorTransparentMenuItem.Checked = false;
-
-            if (config.ForeColor.A == 0)
-                ForeColorTransparentMenuItem.Checked = true;
-            else
-                ForeColorTransparentMenuItem.Checked = false;
-
-            if (config.TextBorderColor.A == 0)
-                TextBorderTransparentMenuItem.Checked = true;
-            else
-                TextBorderTransparentMenuItem.Checked = false;
+            this.AlwaysOnTopMenuItem.Checked = config.AlwaysOnTop;
+            this.TopMost = config.AlwaysOnTop;
         }
         private void SetDateFormatMenus(ToolStripMenuItem menuItem = null)
         {
@@ -377,10 +365,10 @@ namespace SwitchWinClock
 
             if (config.ClockStyle == Clock_Style.Border)
             {
-                fontObject = new FontObject(dt, ft);
-                fontObject.Outlined = true;
-                fontObject.Outline = new Pen(config.TextBorderColor, depth);
-                fontObject.FillColor = config.ForeColor;
+                m_fontObject = new FontObject(dt, ft);
+                m_fontObject.Outlined = true;
+                m_fontObject.Outline = new Pen(config.TextBorderColor, depth);
+                m_fontObject.FillColor = config.ForeColor;
 
                 CanvasPaint(e);
             }
@@ -407,7 +395,7 @@ namespace SwitchWinClock
 
                 //float f = e.Graphics.DpiY * fontObject.SizeInPixels / 72f;
                 //fontObject.SizeInEms
-                path.AddString(fontObject.Text, fontObject.FontFamily, (int)fontObject.FontStyle, fontObject.SizeInPoints, this.ClientRectangle, format);
+                path.AddString(m_fontObject.Text, m_fontObject.FontFamily, (int)m_fontObject.FontStyle, m_fontObject.SizeInPoints, this.ClientRectangle, format);
 
                 //e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;   //commented, or it shows the pink form background around the border.
                 // When text is rendered directly
@@ -417,14 +405,14 @@ namespace SwitchWinClock
                 e.Graphics.CompositingMode = CompositingMode.SourceOver;
                 e.Graphics.CompositingQuality = CompositingQuality.HighQuality;
 
-                if (fontObject.Outlined)
-                    e.Graphics.DrawPath(fontObject.Outline, path);
+                if (m_fontObject.Outlined)
+                    e.Graphics.DrawPath(m_fontObject.Outline, path);
 
-                using (var brush = new SolidBrush(fontObject.FillColor))
+                using (var brush = new SolidBrush(m_fontObject.FillColor))
                     e.Graphics.FillPath(brush, path);
             }
 
-            fontObject.Dispose();
+            m_fontObject.Dispose();
         }
         private void Form_MouseMove(object sender, MouseEventArgs e)
         {
@@ -478,7 +466,7 @@ namespace SwitchWinClock
         }
         private void Form_Closing(object sender, EventArgs e)
         {
-            closingForm = true;
+            m_closingForm = true;
             SWCEvents[EventTypes.EVENT_SHUTDOWN].Set();
         }
         private void ExitMenuItem_Click(object sender, EventArgs e)
@@ -685,6 +673,11 @@ namespace SwitchWinClock
                 else
                     tsmi.Checked = false;
             }
+        }
+        private void AlwaysOnTopMenuItem_Click(object sender, EventArgs e)
+        {
+            this.TopMost = this.AlwaysOnTopMenuItem.Checked;
+            config.AlwaysOnTop = this.TopMost;
         }
     }
 }
