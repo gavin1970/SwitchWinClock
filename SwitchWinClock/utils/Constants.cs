@@ -1,4 +1,6 @@
-﻿namespace SwitchWinClock.utils
+﻿using System.Reflection;
+
+namespace SwitchWinClock.utils
 {
     internal class EventTypes
     {
@@ -19,5 +21,18 @@
         public const string FormBorderColor = "FormBorderColor";
         public const string TextBorderColor = "TextBorderColor";
         public const string TextAlignment = "TextAlignment";
+        public const string ManualWinAlignment = "ManualWinAlignment";
+        public const string WinAlignment = "WinAlignment";
+        public const string DeviceNumber = "DeviceNumber";
+        internal static FieldInfo[] GetFields
+        { 
+            get 
+            {
+                return typeof(ColNames).GetFields(
+                                        BindingFlags.Public |
+                                        BindingFlags.Static |
+                                        BindingFlags.FlattenHierarchy);
+            }
+        }
     }
 }

@@ -13,10 +13,12 @@ namespace SwitchWinClock
     public partial class DisplayForm : Form
     {
         delegate void VoidDelegate();
+
         private readonly Font ButtonFont = new Font("Arial Black", 10F, FontStyle.Regular, GraphicsUnit.Pixel);
+        private readonly SCConfig config = new SCConfig();
+        private readonly Screen[] m_allScreens = Screen.AllScreens;
 
         private FontObject fontObject;
-        private SCConfig config = new SCConfig();
         private static bool closingForm = false;
         private int waitTimer = 60000;  //default: 1 min
 
@@ -28,6 +30,7 @@ namespace SwitchWinClock
             this.SetCheckTextDepth(config.TextBorderDepth);
             this.SetDateFormatMenus();
             this.SetFormLocation();
+            this.SetWinAlignCheckDefault();
         }
         private StringFormat GetTextAlignment()
         {
@@ -108,15 +111,62 @@ namespace SwitchWinClock
         }
         private void SetFormLocation()
         {
-            if (config.FormLocation.X == 0)
-                this.Left = (Screen.GetWorkingArea(this).Width / 2) - (this.Width / 2);     //center screen
-            else
-                this.Left = config.FormLocation.X;
+            if (config.ManualWinAlignment)
+            {
+                if (config.FormLocation.X == 0)
+                    this.Left = (Screen.GetWorkingArea(this).Width / 2) - (this.Width / 2);     //center screen
+                else
+                    this.Left = config.FormLocation.X;
 
-            if (config.FormLocation.Y == 0)
-                this.Top = (Screen.GetWorkingArea(this).Height / 2) - (this.Height / 2);    //center screen
+                if (config.FormLocation.Y == 0)
+                    this.Top = (Screen.GetWorkingArea(this).Height / 2) - (this.Height / 2);    //center screen
+                else
+                    this.Top = config.FormLocation.Y;
+            }
             else
-                this.Top = config.FormLocation.Y;
+            {
+                var thisScreen = m_allScreens[m_allScreens.Length >= config.DeviceNumber ? config.DeviceNumber : 0].Bounds;
+
+                switch (config.WinAlignment)
+                {
+                    case ContentAlignment.TopLeft:
+                        this.Left = thisScreen.Left;
+                        this.Top = thisScreen.Top;
+                        break;
+                    case ContentAlignment.TopCenter:
+                        this.Left = ((thisScreen.Left + thisScreen.Width) - (thisScreen.Width / 2)) - (this.Width / 2);
+                        this.Top = thisScreen.Top;
+                        break;
+                    case ContentAlignment.TopRight:
+                        this.Left = (thisScreen.Left + thisScreen.Width) - (this.Width);
+                        this.Top = thisScreen.Top;
+                        break;
+                    case ContentAlignment.MiddleLeft:
+                        this.Left = thisScreen.Left;
+                        this.Top = ((thisScreen.Top + thisScreen.Height) - (thisScreen.Height / 2)) - (this.Height / 2);
+                        break;
+                    case ContentAlignment.MiddleCenter:
+                        this.Left = ((thisScreen.Left + thisScreen.Width) - (thisScreen.Width / 2)) - (this.Width / 2);
+                        this.Top = ((thisScreen.Top + thisScreen.Height) - (thisScreen.Height / 2)) - (this.Height / 2);
+                        break;
+                    case ContentAlignment.MiddleRight:
+                        this.Left = (thisScreen.Left + thisScreen.Width) - (this.Width);
+                        this.Top = ((thisScreen.Top + thisScreen.Height) - (thisScreen.Height / 2)) - (this.Height / 2);
+                        break;
+                    case ContentAlignment.BottomLeft:
+                        this.Left = thisScreen.Left;
+                        this.Top = (thisScreen.Top+ thisScreen.Height) - (this.Height);
+                        break;
+                    case ContentAlignment.BottomCenter:
+                        this.Left = ((thisScreen.Left + thisScreen.Width) - (thisScreen.Width / 2)) - (this.Width / 2);
+                        this.Top = (thisScreen.Top + thisScreen.Height) - (this.Height);
+                        break;
+                    case ContentAlignment.BottomRight:
+                        this.Left = (thisScreen.Left + thisScreen.Width) - (this.Width);
+                        this.Top = (thisScreen.Top + thisScreen.Height) - (this.Height);
+                        break;
+                }
+            }
         }
         private void RefreshForm()
         {
@@ -138,7 +188,9 @@ namespace SwitchWinClock
                 if (closingForm)
                     return;
 
-                this.SetFormLocation();
+                if(!this.Drag)
+                    this.SetFormLocation();
+
                 this.Invalidate();
             }
         }
@@ -170,10 +222,11 @@ namespace SwitchWinClock
                 waitTimer = 100;
             else //if (config.DateFormat?.IndexOf("ss") > -1)
             {
+                int sec = now.Second <= 59 ? now.Second + 1 : now.Second;
+
                 waitTimer = 1000;
                 RefreshForm();
-
-                futureDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second + 1);   //strips milliseconds
+                futureDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, sec);   //strips milliseconds
             }
             
             TimeSpan diff = futureDate.Subtract(now);
@@ -373,84 +426,6 @@ namespace SwitchWinClock
 
             fontObject.Dispose();
         }
-        public void NextSubpathExample2(PaintEventArgs e)
-        {
-
-            // Create a graphics path.
-            GraphicsPath myPath = new GraphicsPath();
-
-            // Set up primitives to add to myPath.
-            Point[] myPoints = {new Point(20, 20), new Point(120, 120), new Point(20, 120),new Point(20, 20) };
-            Rectangle myRect = new Rectangle(120, 120, 100, 100);
-
-            // Add 3 lines, a rectangle, an ellipse, and 2 markers.
-            myPath.AddLines(myPoints);
-            myPath.SetMarkers();
-            myPath.AddRectangle(myRect);
-            myPath.SetMarkers();
-            myPath.AddEllipse(220, 220, 100, 100);
-
-            // Get the total number of points for the path,
-
-            // and the arrays of the points and types.
-            int myPathPointCount = myPath.PointCount;
-            PointF[] myPathPoints = myPath.PathPoints;
-            byte[] myPathTypes = myPath.PathTypes;
-
-            // Set up variables for listing all of the path's
-
-            // points to the screen.
-            int i;
-            float j = 20;
-            Font myFont = new Font("Arial", 8);
-            SolidBrush myBrush = new SolidBrush(Color.Black);
-
-            // List the values of all the path points and types to the screen.
-            for (i = 0; i < myPathPointCount; i++)
-            {
-                e.Graphics.DrawString(myPathPoints[i].X.ToString() +
-                    ", " + myPathPoints[i].Y.ToString() + ", " +
-                    myPathTypes[i].ToString(),
-                    myFont,
-                    myBrush,
-                    20,
-                    j);
-                j += 20;
-            }
-
-            // Create a GraphicsPathIterator for myPath.
-            GraphicsPathIterator myPathIterator = new
-                GraphicsPathIterator(myPath);
-
-            // Rewind the iterator.
-            myPathIterator.Rewind();
-
-            // Create the GraphicsPath section.
-            GraphicsPath myPathSection = new GraphicsPath();
-
-            // Iterate to the 3rd subpath and list the number of points therein
-
-            // to the screen.
-            int subpathPoints;
-            bool IsClosed2;
-
-            // Iterate to the third subpath.
-            subpathPoints = myPathIterator.NextSubpath(
-                myPathSection, out IsClosed2);
-            subpathPoints = myPathIterator.NextSubpath(
-                myPathSection, out IsClosed2);
-            subpathPoints = myPathIterator.NextSubpath(
-                myPathSection, out IsClosed2);
-
-            // Write the number of subpath points to the screen.
-            e.Graphics.DrawString("Subpath: 3" +
-                "   Num Points: " +
-                subpathPoints.ToString(),
-                myFont,
-                myBrush,
-                200,
-                20);
-        }
         private void Form_MouseMove(object sender, MouseEventArgs e)
         {
             if (this.Drag)
@@ -475,12 +450,31 @@ namespace SwitchWinClock
         }
         private void Form_MouseDown(object sender, MouseEventArgs e)
         {
-            this.StartPoint = e.Location;
-            this.Drag = true;
+            if (e.Button == MouseButtons.Left)
+            {
+                this.StartPoint = e.Location;
+                this.Drag = true;
+            }
         }
         private void Form_MouseUp(object sender, MouseEventArgs e)
         {
-            Drag = false;
+            if (this.Drag && e.Button == MouseButtons.Left)
+            {
+                for (int id = 0; id < m_allScreens.Length; id++)
+                {
+                    if (this.Left > m_allScreens[id].Bounds.Left &&
+                        this.Left < m_allScreens[id].Bounds.Right)
+                    {
+                        if(config.DeviceNumber != id)   //only update if different than existing.
+                            config.DeviceNumber = id;   //update is sent to file.
+
+                        break;
+                    }
+                }
+            }
+            
+            if (this.Drag)
+                this.Drag = false;  //shouldn't be set.
         }
         private void Form_Closing(object sender, EventArgs e)
         {
@@ -654,6 +648,43 @@ namespace SwitchWinClock
         private void NewInstanceMenuItem_Click(object sender, EventArgs e)
         {
             Global.RunApp(file: About.AppPath, args: "1");
+        }
+        private void WinAlignMenuItems_Click(object sender, EventArgs e)
+        {
+            var winAlignSel = sender as ToolStripMenuItem;
+            Type t = sender.GetType();
+            var menuItemName = ((ToolStripMenuItem)sender).Name.Replace("WinAlign", "").Replace("MenuItem", "");
+
+            if (!winAlignSel.Checked)
+                winAlignSel.Checked = true; //don't uncheck if they click it twice.
+
+            if (menuItemName.Equals("Manual"))
+                config.ManualWinAlignment = true;
+            else
+                config.ManualWinAlignment = false;
+
+            foreach (ToolStripMenuItem tsmi in this.WinAlignmentMenuItem.DropDownItems)
+            {
+                if(tsmi.Checked && !winAlignSel.Name.Equals(tsmi.Name))
+                    tsmi.Checked = false;
+                else if(winAlignSel.Name.Equals(tsmi.Name))
+                {
+                    if (Enum.TryParse(menuItemName, out ContentAlignment winAlign))
+                        config.WinAlignment = winAlign;
+                }
+            }
+        }
+        private void SetWinAlignCheckDefault()
+        {
+            string winAlign2Check = config.WinAlignment.ToString();
+
+            foreach (ToolStripMenuItem tsmi in this.WinAlignmentMenuItem.DropDownItems)
+            {
+                if (tsmi.Name.Contains(winAlign2Check))
+                    tsmi.Checked = true;
+                else
+                    tsmi.Checked = false;
+            }
         }
     }
 }

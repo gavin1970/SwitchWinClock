@@ -1,9 +1,8 @@
 ﻿using SwitchWinClock.utils;
 using System;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Drawing.Design;
+using System.Reflection;
 
 namespace SwitchWinClock
 {
@@ -17,6 +16,8 @@ namespace SwitchWinClock
     internal class SCConfig
     {
         const string SETTINGS_TABLE = "Settings";
+        private readonly string[] RefreshDataErrors = new string[] { "does not belong", "column missing" };
+
         private static JSONData _jSON;
         private static DataTable _DataTable = new DataTable();
         private SLog Log = new SLog();
@@ -30,6 +31,9 @@ namespace SwitchWinClock
         private Color _FormBorderColor = Color.Transparent;
         private Color _TextBorderColor = Color.Black;
         private ContentAlignment _TextAlignment = ContentAlignment.MiddleCenter;
+        private ContentAlignment _WinAlignment = ContentAlignment.TopCenter;
+        private bool _ManualWinAlignment = true;
+        private int _DeviceNumber = 1;
 
         public SCConfig() 
         {
@@ -141,19 +145,52 @@ namespace SwitchWinClock
                 Update();
             }
         }
+        public bool ManualWinAlignment
+        {
+            get { return _ManualWinAlignment; }
+            set
+            {
+                _ManualWinAlignment = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.ManualWinAlignment] = {_ManualWinAlignment}");
+                Update();
+            }
+        }
+        public ContentAlignment WinAlignment
+        {
+            get { return _WinAlignment; }
+            set
+            {
+                _WinAlignment = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.WinAlignment] = {_WinAlignment}");
+                Update();
+            }
+        }
         public ContentAlignment TextAlignment
         {
             get { return _TextAlignment; }
             set
             {
-                TextAlignment = value;
+                _TextAlignment = value;
                 Log.WriteLine(SMsgType.Information, $"[ColNames.TextAlignment] = {_TextAlignment}");
+                Update();
+            }
+        }
+        public int DeviceNumber
+        {
+            get { return _DeviceNumber; }
+            set
+            {
+                _DeviceNumber = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.DeviceNumber] = {_DeviceNumber}");
                 Update();
             }
         }
         private void LoadData()
         {
-            foreach(DataRow dRow in _DataTable.Rows)
+            if(!ValidColums())
+                CreateDataTable();
+
+            foreach (DataRow dRow in _DataTable.Rows)
             {
                 _ClockStyle = _jSON.GetColumn<Clock_Style>(dRow, ColNames.ClockStyle, _ClockStyle);
                 _DateFormat = _jSON.GetColumn<string>(dRow, ColNames.DateFormat, _DateFormat);
@@ -165,17 +202,41 @@ namespace SwitchWinClock
                 _FormBorderColor = _jSON.GetColumn<Color>(dRow, ColNames.FormBorderColor, _FormBorderColor);
                 _TextBorderColor = _jSON.GetColumn<Color>(dRow, ColNames.TextBorderColor, _TextBorderColor);
                 _TextAlignment = _jSON.GetColumn<ContentAlignment>(dRow, ColNames.TextAlignment, _TextAlignment);
+                _ManualWinAlignment = _jSON.GetColumn<bool>(dRow, ColNames.ManualWinAlignment, _ManualWinAlignment);
+                _WinAlignment = _jSON.GetColumn<ContentAlignment>(dRow, ColNames.WinAlignment, _WinAlignment);
+                _DeviceNumber = _jSON.GetColumn<int>(dRow, ColNames.DeviceNumber, _DeviceNumber);
             }
 
-            //if missing a new column, lets create new table, using existing memory data.
-            if (_jSON.LastError != null && _jSON.LastError.Message.IndexOf("does not belong", StringComparison.OrdinalIgnoreCase) > -1)
-            {
-                _DataTable.Clear();
-                _DataTable = null;
-                Update();
-            }
-            else if (_jSON.LastError != null)
+            /*
+            //TODO: Don't think this is required anymore as it's called on startup of the app because of forced click.
+            //if something is missing a column or required data, lets add it
+            //to the table, using existing data in memory/defaults.  
+            if (IsResetDataMessage())
+                Update();               
+            else              
+            */
+            if (_jSON.LastError != null)
                 throw new Exception(_jSON.LastError.Message);
+        }
+        private bool IsResetDataMessage()
+        {
+            bool retVal = false;
+            string msg;
+
+            if (_jSON.LastError == null)
+                return retVal;
+            else
+                msg = _jSON.LastError.Message;
+
+            foreach (string str in RefreshDataErrors)
+            {
+                if (msg.ToLower().Contains(str.ToLower()))
+                {
+                    retVal = true;
+                    break;
+                }
+            }
+            return retVal;
         }
         private void Update()
         {
@@ -207,6 +268,9 @@ namespace SwitchWinClock
             dRow[ColNames.FormBorderColor] = _jSON.ColorToInt(_FormBorderColor);
             dRow[ColNames.TextBorderColor] = _jSON.ColorToInt(_TextBorderColor);
             dRow[ColNames.TextAlignment] = _TextAlignment;
+            dRow[ColNames.ManualWinAlignment] = _ManualWinAlignment;
+            dRow[ColNames.WinAlignment] = _WinAlignment;
+            dRow[ColNames.DeviceNumber] = _DeviceNumber;
 
             if (_DataTable.Rows.Count == 0)
                 _DataTable.Rows.Add(dRow);  //add record to table.
@@ -217,18 +281,51 @@ namespace SwitchWinClock
         private void CreateDataTable()
         {
             Log.WriteLine(SMsgType.Information, $"Creating table: {SETTINGS_TABLE}{Global.AppID}...");
-            _DataTable = new DataTable($"{SETTINGS_TABLE}{Global.AppID}");
-            _DataTable.Columns.Add(new DataColumn(ColNames.ClockStyle, typeof(Clock_Style)));
-            _DataTable.Columns.Add(new DataColumn(ColNames.DateFormat, typeof(string)));
-            _DataTable.Columns.Add(new DataColumn(ColNames.FormLocation, typeof(Point)));
-            _DataTable.Columns.Add(new DataColumn(ColNames.Font, typeof(Font)));
-            _DataTable.Columns.Add(new DataColumn(ColNames.TextBorderDepth, typeof(int)));
-            _DataTable.Columns.Add(new DataColumn(ColNames.ForeColor, typeof(int)));
-            _DataTable.Columns.Add(new DataColumn(ColNames.BackColor, typeof(int)));
-            _DataTable.Columns.Add(new DataColumn(ColNames.FormBorderColor, typeof(int)));
-            _DataTable.Columns.Add(new DataColumn(ColNames.TextBorderColor, typeof(int)));
-            _DataTable.Columns.Add(new DataColumn(ColNames.TextAlignment, typeof(ContentAlignment)));
+            if(_DataTable == null)
+                _DataTable = new DataTable($"{SETTINGS_TABLE}{Global.AppID}");
+            if(!_DataTable.Columns.Contains(ColNames.ClockStyle))
+                _DataTable.Columns.Add(new DataColumn(ColNames.ClockStyle, typeof(Clock_Style)));
+            if (!_DataTable.Columns.Contains(ColNames.DateFormat))
+                _DataTable.Columns.Add(new DataColumn(ColNames.DateFormat, typeof(string)));
+            if (!_DataTable.Columns.Contains(ColNames.FormLocation))
+                _DataTable.Columns.Add(new DataColumn(ColNames.FormLocation, typeof(Point)));
+            if (!_DataTable.Columns.Contains(ColNames.Font))
+                _DataTable.Columns.Add(new DataColumn(ColNames.Font, typeof(Font)));
+            if (!_DataTable.Columns.Contains(ColNames.TextBorderDepth))
+                _DataTable.Columns.Add(new DataColumn(ColNames.TextBorderDepth, typeof(int)));
+            if (!_DataTable.Columns.Contains(ColNames.ForeColor))
+                _DataTable.Columns.Add(new DataColumn(ColNames.ForeColor, typeof(int)));
+            if (!_DataTable.Columns.Contains(ColNames.BackColor))
+                _DataTable.Columns.Add(new DataColumn(ColNames.BackColor, typeof(int)));
+            if (!_DataTable.Columns.Contains(ColNames.FormBorderColor))
+                _DataTable.Columns.Add(new DataColumn(ColNames.FormBorderColor, typeof(int)));
+            if (!_DataTable.Columns.Contains(ColNames.TextBorderColor))
+                _DataTable.Columns.Add(new DataColumn(ColNames.TextBorderColor, typeof(int)));
+            if (!_DataTable.Columns.Contains(ColNames.TextAlignment))
+                _DataTable.Columns.Add(new DataColumn(ColNames.TextAlignment, typeof(ContentAlignment)));
+            if (!_DataTable.Columns.Contains(ColNames.ManualWinAlignment))
+                _DataTable.Columns.Add(new DataColumn(ColNames.ManualWinAlignment, typeof(bool)));
+            if (!_DataTable.Columns.Contains(ColNames.WinAlignment))
+                _DataTable.Columns.Add(new DataColumn(ColNames.WinAlignment, typeof(ContentAlignment)));
+            if (!_DataTable.Columns.Contains(ColNames.DeviceNumber))
+                _DataTable.Columns.Add(new DataColumn(ColNames.DeviceNumber, typeof(int)));
             Log.WriteLine(SMsgType.Information, $"Created table: {SETTINGS_TABLE}{Global.AppID}...");
+        }
+        private bool ValidColums()
+        {
+            bool retVal = true;
+
+            foreach(FieldInfo field in ColNames.GetFields)
+            {
+                if (!_DataTable.Columns.Contains(field.Name))
+                {
+                    retVal = false;
+                    break;
+                }
+
+            }
+
+            return retVal;
         }
     }
 }

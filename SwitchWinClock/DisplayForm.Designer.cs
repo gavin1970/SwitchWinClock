@@ -38,6 +38,17 @@ namespace SwitchWinClock
             this.StyleDeptMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StyleBorderMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FontSetupMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WinAlignmentMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WinAlignManualMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WinAlignTopLeftMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WinAlignTopCenterMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WinAlignTopRightMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WinAlignMiddleLeftMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WinAlignMiddleCenterMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WinAlignMiddleRightMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WinAlignBottomLeftMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WinAlignBottomCenterMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WinAlignBottomRightMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DateFormattingMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CustomDateFormatMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CustomDateTextBox = new System.Windows.Forms.ToolStripTextBox();
@@ -80,6 +91,7 @@ namespace SwitchWinClock
             this.SettingsContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ClockStyleMenuItem,
             this.FontSetupMenuItem,
+            this.WinAlignmentMenuItem,
             this.DateFormattingMenuItem,
             this.ColorSetupMenuItem,
             this.TextDepthpMenuItem,
@@ -88,7 +100,7 @@ namespace SwitchWinClock
             this.toolStripSeparator2,
             this.ExitMenuItem});
             this.SettingsContextMenu.Name = "SettingsContextMenu";
-            this.SettingsContextMenu.Size = new System.Drawing.Size(157, 170);
+            this.SettingsContextMenu.Size = new System.Drawing.Size(181, 214);
             this.SettingsContextMenu.MouseLeave += new System.EventHandler(this.Menu_MouseLeave);
             // 
             // ClockStyleMenuItem
@@ -97,7 +109,7 @@ namespace SwitchWinClock
             this.StyleDeptMenuItem,
             this.StyleBorderMenuItem});
             this.ClockStyleMenuItem.Name = "ClockStyleMenuItem";
-            this.ClockStyleMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.ClockStyleMenuItem.Size = new System.Drawing.Size(180, 22);
             this.ClockStyleMenuItem.Text = "Clock &Style";
             // 
             // StyleDeptMenuItem
@@ -105,7 +117,7 @@ namespace SwitchWinClock
             this.StyleDeptMenuItem.CheckOnClick = true;
             this.StyleDeptMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.StyleDeptMenuItem.Name = "StyleDeptMenuItem";
-            this.StyleDeptMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.StyleDeptMenuItem.Size = new System.Drawing.Size(109, 22);
             this.StyleDeptMenuItem.Text = "&Depth";
             this.StyleDeptMenuItem.Click += new System.EventHandler(this.StyleDeptMenuItem_Click);
             // 
@@ -114,16 +126,115 @@ namespace SwitchWinClock
             this.StyleBorderMenuItem.CheckOnClick = true;
             this.StyleBorderMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.StyleBorderMenuItem.Name = "StyleBorderMenuItem";
-            this.StyleBorderMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.StyleBorderMenuItem.Size = new System.Drawing.Size(109, 22);
             this.StyleBorderMenuItem.Text = "&Border";
             this.StyleBorderMenuItem.Click += new System.EventHandler(this.StyleBorderMenuItem_Click);
             // 
             // FontSetupMenuItem
             // 
             this.FontSetupMenuItem.Name = "FontSetupMenuItem";
-            this.FontSetupMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.FontSetupMenuItem.Size = new System.Drawing.Size(180, 22);
             this.FontSetupMenuItem.Text = "&Font Settings";
             this.FontSetupMenuItem.Click += new System.EventHandler(this.FontSetupMenuItem_Click);
+            // 
+            // WinAlignmentMenuItem
+            // 
+            this.WinAlignmentMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.WinAlignManualMenuItem,
+            this.WinAlignTopLeftMenuItem,
+            this.WinAlignTopCenterMenuItem,
+            this.WinAlignTopRightMenuItem,
+            this.WinAlignMiddleLeftMenuItem,
+            this.WinAlignMiddleCenterMenuItem,
+            this.WinAlignMiddleRightMenuItem,
+            this.WinAlignBottomLeftMenuItem,
+            this.WinAlignBottomCenterMenuItem,
+            this.WinAlignBottomRightMenuItem});
+            this.WinAlignmentMenuItem.Name = "WinAlignmentMenuItem";
+            this.WinAlignmentMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.WinAlignmentMenuItem.Text = "&Window Alignment";
+            // 
+            // WinAlignManualMenuItem
+            // 
+            this.WinAlignManualMenuItem.Checked = true;
+            this.WinAlignManualMenuItem.CheckOnClick = true;
+            this.WinAlignManualMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.WinAlignManualMenuItem.Name = "WinAlignManualMenuItem";
+            this.WinAlignManualMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.WinAlignManualMenuItem.Text = "&Manual";
+            this.WinAlignManualMenuItem.Click += new System.EventHandler(this.WinAlignMenuItems_Click);
+            // 
+            // WinAlignTopLeftMenuItem
+            // 
+            this.WinAlignTopLeftMenuItem.CheckOnClick = true;
+            this.WinAlignTopLeftMenuItem.Name = "WinAlignTopLeftMenuItem";
+            this.WinAlignTopLeftMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.WinAlignTopLeftMenuItem.Text = "&Top Left";
+            this.WinAlignTopLeftMenuItem.Click += new System.EventHandler(this.WinAlignMenuItems_Click);
+            // 
+            // WinAlignTopCenterMenuItem
+            // 
+            this.WinAlignTopCenterMenuItem.CheckOnClick = true;
+            this.WinAlignTopCenterMenuItem.Name = "WinAlignTopCenterMenuItem";
+            this.WinAlignTopCenterMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.WinAlignTopCenterMenuItem.Text = "&Top Center";
+            this.WinAlignTopCenterMenuItem.Click += new System.EventHandler(this.WinAlignMenuItems_Click);
+            // 
+            // WinAlignTopRightMenuItem
+            // 
+            this.WinAlignTopRightMenuItem.CheckOnClick = true;
+            this.WinAlignTopRightMenuItem.Name = "WinAlignTopRightMenuItem";
+            this.WinAlignTopRightMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.WinAlignTopRightMenuItem.Text = "&Top Right";
+            this.WinAlignTopRightMenuItem.Click += new System.EventHandler(this.WinAlignMenuItems_Click);
+            // 
+            // WinAlignMiddleLeftMenuItem
+            // 
+            this.WinAlignMiddleLeftMenuItem.CheckOnClick = true;
+            this.WinAlignMiddleLeftMenuItem.Name = "WinAlignMiddleLeftMenuItem";
+            this.WinAlignMiddleLeftMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.WinAlignMiddleLeftMenuItem.Text = "&Middle Left";
+            this.WinAlignMiddleLeftMenuItem.Click += new System.EventHandler(this.WinAlignMenuItems_Click);
+            // 
+            // WinAlignMiddleCenterMenuItem
+            // 
+            this.WinAlignMiddleCenterMenuItem.CheckOnClick = true;
+            this.WinAlignMiddleCenterMenuItem.Name = "WinAlignMiddleCenterMenuItem";
+            this.WinAlignMiddleCenterMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.WinAlignMiddleCenterMenuItem.Text = "&Middle Center";
+            this.WinAlignMiddleCenterMenuItem.Click += new System.EventHandler(this.WinAlignMenuItems_Click);
+            // 
+            // WinAlignMiddleRightMenuItem
+            // 
+            this.WinAlignMiddleRightMenuItem.CheckOnClick = true;
+            this.WinAlignMiddleRightMenuItem.Name = "WinAlignMiddleRightMenuItem";
+            this.WinAlignMiddleRightMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.WinAlignMiddleRightMenuItem.Text = "&Middle Right";
+            this.WinAlignMiddleRightMenuItem.Click += new System.EventHandler(this.WinAlignMenuItems_Click);
+            // 
+            // WinAlignBottomLeftMenuItem
+            // 
+            this.WinAlignBottomLeftMenuItem.CheckOnClick = true;
+            this.WinAlignBottomLeftMenuItem.Name = "WinAlignBottomLeftMenuItem";
+            this.WinAlignBottomLeftMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.WinAlignBottomLeftMenuItem.Text = "&Bottom Left";
+            this.WinAlignBottomLeftMenuItem.Click += new System.EventHandler(this.WinAlignMenuItems_Click);
+            // 
+            // WinAlignBottomCenterMenuItem
+            // 
+            this.WinAlignBottomCenterMenuItem.CheckOnClick = true;
+            this.WinAlignBottomCenterMenuItem.Name = "WinAlignBottomCenterMenuItem";
+            this.WinAlignBottomCenterMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.WinAlignBottomCenterMenuItem.Text = "&Bottom Center";
+            this.WinAlignBottomCenterMenuItem.Click += new System.EventHandler(this.WinAlignMenuItems_Click);
+            // 
+            // WinAlignBottomRightMenuItem
+            // 
+            this.WinAlignBottomRightMenuItem.CheckOnClick = true;
+            this.WinAlignBottomRightMenuItem.Name = "WinAlignBottomRightMenuItem";
+            this.WinAlignBottomRightMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.WinAlignBottomRightMenuItem.Text = "&Bottom Right";
+            this.WinAlignBottomRightMenuItem.Click += new System.EventHandler(this.WinAlignMenuItems_Click);
             // 
             // DateFormattingMenuItem
             // 
@@ -134,7 +245,7 @@ namespace SwitchWinClock
             this.PresetDateFormatItem3,
             this.PresetDateFormatItem4});
             this.DateFormattingMenuItem.Name = "DateFormattingMenuItem";
-            this.DateFormattingMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.DateFormattingMenuItem.Size = new System.Drawing.Size(180, 22);
             this.DateFormattingMenuItem.Text = "&Date Formating";
             // 
             // CustomDateFormatMenuItem
@@ -188,7 +299,7 @@ namespace SwitchWinClock
             this.BorderColorMenuItem,
             this.TextBorderColorMenuItem});
             this.ColorSetupMenuItem.Name = "ColorSetupMenuItem";
-            this.ColorSetupMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.ColorSetupMenuItem.Size = new System.Drawing.Size(180, 22);
             this.ColorSetupMenuItem.Text = "&Color Settings";
             // 
             // ForeColorMenuItem
@@ -300,7 +411,7 @@ namespace SwitchWinClock
             this.toolStripMenuItem8,
             this.toolStripMenuItem9});
             this.TextDepthpMenuItem.Name = "TextDepthpMenuItem";
-            this.TextDepthpMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.TextDepthpMenuItem.Size = new System.Drawing.Size(180, 22);
             this.TextDepthpMenuItem.Text = "&Text Depth";
             // 
             // toolStripMenuItem1
@@ -378,24 +489,24 @@ namespace SwitchWinClock
             // ToolStripSeparator1
             // 
             this.ToolStripSeparator1.Name = "ToolStripSeparator1";
-            this.ToolStripSeparator1.Size = new System.Drawing.Size(153, 6);
+            this.ToolStripSeparator1.Size = new System.Drawing.Size(177, 6);
             // 
             // NewInstanceMenuItem
             // 
             this.NewInstanceMenuItem.Name = "NewInstanceMenuItem";
-            this.NewInstanceMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.NewInstanceMenuItem.Size = new System.Drawing.Size(180, 22);
             this.NewInstanceMenuItem.Text = "&New Instance";
             this.NewInstanceMenuItem.Click += new System.EventHandler(this.NewInstanceMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(153, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
             // 
             // ExitMenuItem
             // 
             this.ExitMenuItem.Name = "ExitMenuItem";
-            this.ExitMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.ExitMenuItem.Size = new System.Drawing.Size(180, 22);
             this.ExitMenuItem.Text = "E&xit";
             this.ExitMenuItem.Click += new System.EventHandler(this.ExitMenuItem_Click);
             // 
@@ -466,6 +577,17 @@ namespace SwitchWinClock
         private System.Windows.Forms.ToolStripMenuItem TextBorderTransparentMenuItem;
         private System.Windows.Forms.ToolStripMenuItem NewInstanceMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem WinAlignmentMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem WinAlignManualMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem WinAlignTopLeftMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem WinAlignTopCenterMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem WinAlignTopRightMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem WinAlignMiddleLeftMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem WinAlignMiddleCenterMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem WinAlignMiddleRightMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem WinAlignBottomLeftMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem WinAlignBottomCenterMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem WinAlignBottomRightMenuItem;
     }
 }
 

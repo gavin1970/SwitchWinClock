@@ -488,19 +488,22 @@ namespace SwitchWinClock.utils
                 var value = dr[columnName];
                 Type type = value.GetType();
 
+                if (type.Name == "DBNull")
+                    value = defaultValue;
+
                 //if not null then convert it to what the generic is..
                 if (value != null)
                 {
                     if (typeof(T).IsEnum)
                     {
-                        if(int.TryParse(value.ToString(), out int iVal))
+                        if (int.TryParse(value.ToString(), out int iVal))
                             retVal = (T)Enum.ToObject(typeof(T), iVal);
                         else
                             retVal = (T)value;
                     }
                     else if (typeof(T).Name == "Font")
                     {
-                        retVal = Convert2Font(value.ToString());
+                        retVal = Convert2Font(value?.ToString());
                     }
                     else if (type.Name == "Guid" && typeof(T).Name == "String")
                     {
@@ -544,6 +547,8 @@ namespace SwitchWinClock.utils
                     if (typeof(T).Name == "String")
                         retVal = JsonClean((string)retVal, true);
                 }
+                else
+                    retVal = defaultValue;
             }
             catch (Exception ex)
             {
