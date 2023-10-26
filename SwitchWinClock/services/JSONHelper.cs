@@ -11,6 +11,11 @@ using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 
+/// <summary>
+/// Note to anyone that looks through any of my classes.  I like Properites over variables.  
+/// It allows me to quickly see how many things are using it and quick references to all.
+/// Some things can't be properties, which is why the are variables.
+/// </summary>
 namespace SwitchWinClock.utils
 {
     public abstract class JSONHelper : IDisposable
@@ -21,19 +26,19 @@ namespace SwitchWinClock.utils
             public string Value;
         }
 
+        internal const string SCHEMA_TABLE_NAME = "schemas";
+        private const string MISSING_FILE = "File path in connection string is required.  e.g. file=C:\\Path\\DataFile.data";
+        private bool m_disposedValue = false;
+
         /// <summary>
         /// This LastChanged is because the event will fire 2-3 times on one 
         /// change, so we only want to catch the first and ignore the rest for 1 sec.
         /// </summary>
         private static DateTime LastChanged { get; set; } = DateTime.Now;
-        public static object DbLock { get; } = new object();
-        static private bool LocalSave { get; set; } = false;
-        internal const string SCHEMA_TABLE_NAME = "schemas";
-        const string MISSING_FILE = "File path in connection string is required.  e.g. file=C:\\Path\\DataFile.data";
-        private bool disposedValue;
-
-        static FileSystemWatcher watcher;
-        static bool MonitorSet { get; set; } = false;
+        public static object DSetLock { get; } = new object();
+        private static bool LocalSave { get; set; } = false;
+        private static bool MonitorSet { get; set; } = false;
+        private static FileSystemWatcher Watcher { get; set; }
 
         #region Public Properties
         /// <summary>
@@ -59,36 +64,42 @@ namespace SwitchWinClock.utils
         /// Last Parameters Passed in.
         /// </summary>
         internal object[] LastParameters { get; set; } = null;
-        /// <summary>
-        /// Data File.
-        /// </summary>
         #endregion
 
         #region Internal Methods
+        /// <summary>
+        /// Setup watch of Monitor, if someone modifies it outside of this app, it will pick up the changes.
+        /// </summary>
         internal void SetFileMonitor()
         {
             if (!File.Exists(ConnectionString.UserName) || MonitorSet)
                 return;
 
+            //dont allow more than one.
+            MonitorSet = true;
+            //folder to monitor
             string dir = Path.GetDirectoryName(ConnectionString.UserName);
+            //check
             if (string.IsNullOrWhiteSpace(dir))
                 dir = About.AppFileDirectory;
-
-            if (!string.IsNullOrWhiteSpace(dir) && watcher == null)
+            //lets setup watch
+            if (!string.IsNullOrWhiteSpace(dir) && Watcher == null)
             {
-                watcher = new FileSystemWatcher(dir)
+                Watcher = new FileSystemWatcher(dir)
                 {
+                    //info to send me.
                     NotifyFilter = NotifyFilters.CreationTime
                                      | NotifyFilters.LastWrite
                                      | NotifyFilters.Size
                 };
-
-                watcher.Changed += OnChanged;
-
-                watcher.Filter = Path.GetFileName(ConnectionString.UserName);
-                watcher.IncludeSubdirectories = true;
-                watcher.EnableRaisingEvents = true;
-                MonitorSet = true;
+                //event to be sent where for Change ONLY.
+                Watcher.Changed += OnChanged;
+                //filter to this config file only.
+                Watcher.Filter = Path.GetFileName(ConnectionString.UserName);
+                //no other folders or files.
+                Watcher.IncludeSubdirectories = false;
+                //allow event
+                Watcher.EnableRaisingEvents = true;
             }
         }
         /// <summary>
@@ -98,13 +109,18 @@ namespace SwitchWinClock.utils
         /// <param name="e"></param>
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
-            if (DateTime.Now.Subtract(LastChanged) < TimeSpan.FromSeconds(1) || LocalSave)
+            //at times, 3 events are fired, only accept the first.
+            //also if this file is doing the save, we want that ignored as well.
+            //Should be only change, doesn't hurt to verify.
+            if (DateTime.Now.Subtract(LastChanged) < TimeSpan.FromSeconds(1) || 
+                LocalSave || 
+                e.ChangeType != WatcherChangeTypes.Changed)
                 return;
             else
                 LastChanged = DateTime.Now;
 
-            if (e.ChangeType == WatcherChangeTypes.Changed)
-                LoadData(true);
+            //lets force a reload of data.
+            LoadData(true);
         }
         private Color Convert2Color(string color)
         {
@@ -132,6 +148,13 @@ namespace SwitchWinClock.utils
 
             return retVal;
         }
+        /// <summary>
+        /// Many formats of Font as string, these 
+        /// are the most popular ones.
+        /// </summary>
+        /// <param name="fontString"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         private Font Convert2Font(string fontString)
         {
             var fC = new FontConverter();
@@ -145,6 +168,7 @@ namespace SwitchWinClock.utils
 
             string stripFont = fontString;
 
+            //format 1
             if (fontString.StartsWith("[Font: "))
             {
                 try
@@ -153,9 +177,10 @@ namespace SwitchWinClock.utils
                     var ft = fC.ConvertFromString(stripFont) as Font;
                     return ft;
                 }
-                catch { }
+                catch { /* Ingore, we will try the next format */ }
             }
 
+            //format 2
             if (fontString.Contains("Name="))
             {
                 try
@@ -237,6 +262,10 @@ namespace SwitchWinClock.utils
 
             throw new Exception($"Cannot convert Color {color} to int.");
         }
+        internal void ClearError()
+        {
+
+        }
         /// <summary>
         /// Internal user to validate params have been set along with data loaded.
         /// </summary>
@@ -286,20 +315,21 @@ namespace SwitchWinClock.utils
                 {
                     retVal.Status = RESULT_STATUS.MISSING;
                     retVal.Description = $"Missing Data File: {ConnectionString.UserName}";
-                    if (RecordData == null)
-                        RecordData = new DataSet();
+                    lock (DSetLock)
+                    {
+                        if (RecordData == null)
+                            RecordData = new DataSet();
+                    }
                 }
                 else
                 {
-                    lock (DbLock)
+                    lock (DSetLock)
                     {
                         byte[] bytes = File.ReadAllBytes(ConnectionString.UserName);
                         string json = Encoding.UTF8.GetString(bytes);
                         RecordData = (DataSet)JsonConvert.DeserializeObject(GetSecure(json).Password, (typeof(DataSet)));
                     }
                     ColumnCheck();
-                    retVal.Description = "Success";
-                    retVal.Description = "Success";
                 }
             }
             catch (Exception ex)
@@ -325,7 +355,7 @@ namespace SwitchWinClock.utils
 
             try
             {
-                lock (DbLock)
+                lock (DSetLock)
                     RecordData = (DataSet)JsonConvert.DeserializeObject(jsonData, (typeof(DataSet)));
             }
             catch (Exception ex)
@@ -342,18 +372,21 @@ namespace SwitchWinClock.utils
             if (RecordData == null || !RecordData.Tables.Contains(SCHEMA_TABLE_NAME))
                 return;
 
-            lock (DbLock)
+            lock (DSetLock)
             {
                 DataTable schemaDataTable = RecordData.Tables[SCHEMA_TABLE_NAME];
-                DataRow schemaDataRow = schemaDataTable.Rows[0];
-
-                foreach (DataTable dt in RecordData.Tables)
+                if (schemaDataTable?.Rows != null && schemaDataTable.Rows?.Count > 0)
                 {
-                    if (dt.Rows.Count == 0)
+                    DataRow schemaDataRow = schemaDataTable.Rows[0];
+
+                    foreach (DataTable dt in RecordData.Tables)
                     {
-                        string[] columns = schemaDataRow[dt.TableName].ToString().Split(',');
-                        foreach (string column in columns)
-                            dt.Columns.Add(column);
+                        if (dt.Rows.Count == 0)
+                        {
+                            string[] columns = schemaDataRow[dt.TableName].ToString().Split(',');
+                            foreach (string column in columns)
+                                dt.Columns.Add(column);
+                        }
                     }
                 }
 
@@ -361,16 +394,11 @@ namespace SwitchWinClock.utils
                 RecordData.Tables.Remove(SCHEMA_TABLE_NAME);
             }
         }
-        internal string GetJsonData(string passwordColumns = null, SecureString password = null)
+        internal string GetJsonData()
         {
-            //clean up, just in case there are spaces
-            passwordColumns = passwordColumns.Replace(", ", ",");
-            passwordColumns = passwordColumns.Replace(" ,", ",");
-
-            List<string> passCols = passwordColumns.Split(',').ToList();
             DataSet dataSet = null;
 
-            lock (DbLock)
+            lock (DSetLock)
             {
                 dataSet = new DataSet(RecordData.DataSetName);
                 foreach (DataTable dt in RecordData.Tables)
@@ -409,7 +437,7 @@ namespace SwitchWinClock.utils
             DataTable schemaTable = new DataTable(SCHEMA_TABLE_NAME);
             DataRow schemaDataRow = schemaTable.NewRow();
 
-            lock (DbLock)
+            lock (DSetLock)
             {
                 if (RecordData.Tables.Contains(SCHEMA_TABLE_NAME))
                     RecordData.Tables.Remove(SCHEMA_TABLE_NAME);
@@ -570,11 +598,14 @@ namespace SwitchWinClock.utils
             ResultStatus retVal = new ResultStatus();
             try
             {
-                if (RecordData == null)
+                lock (DSetLock)
                 {
-                    retVal.Status = RESULT_STATUS.MISSING;
-                    retVal.Description = "Record data needs to be loaded and have structure before it can be saved.";
-                    return retVal;
+                    if (RecordData == null)
+                    {
+                        retVal.Status = RESULT_STATUS.MISSING;
+                        retVal.Description = "Record data needs to be loaded and have structure before it can be saved.";
+                        return retVal;
+                    }
                 }
 
                 UpdateSchemas();
@@ -582,7 +613,7 @@ namespace SwitchWinClock.utils
                 if (File.Exists(ConnectionString.UserName))
                     File.Delete(ConnectionString.UserName);
 
-                lock (DbLock)
+                lock (DSetLock)
                 {
                     string json = JsonConvert.SerializeObject(RecordData, Formatting.Indented);
                     File.WriteAllText(ConnectionString.UserName, json);
@@ -590,8 +621,6 @@ namespace SwitchWinClock.utils
 
                 if (!MonitorSet)
                     SetFileMonitor();
-
-                retVal.Description = "Success";
             }
             catch (Exception ex)
             {
@@ -606,17 +635,18 @@ namespace SwitchWinClock.utils
 
             return retVal;
         }
+
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!m_disposedValue)
             {
                 if (disposing)
                 {
-                    watcher?.Dispose();
+                    Watcher?.Dispose();
                     RecordData?.Dispose();
                 }
 
-                disposedValue = true;
+                m_disposedValue = true;
             }
         }
         ~JSONHelper()

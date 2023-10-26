@@ -37,7 +37,12 @@ namespace SwitchWinClock
             this.ClockStyleMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StyleDeptMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StyleBorderMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.StyleCounterMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FontSetupMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.AlwaysOnTopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.WinAlignmentMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.WinAlignManualMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.WinAlignTopLeftMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -56,6 +61,8 @@ namespace SwitchWinClock
             this.PresetDateFormatItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.PresetDateFormatItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.PresetDateFormatItem4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.CounterFormattingMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.CounterYMDHMSMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ColorSetupMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ForeColorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ForeColorSetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -81,11 +88,10 @@ namespace SwitchWinClock
             this.toolStripMenuItem9 = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.NewInstanceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.AvailableInstanceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.DeleteInstanceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.ExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.AlwaysOnTopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.SettingsContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -99,21 +105,27 @@ namespace SwitchWinClock
             this.toolStripSeparator4,
             this.WinAlignmentMenuItem,
             this.DateFormattingMenuItem,
+            this.CounterFormattingMenuItem,
             this.ColorSetupMenuItem,
             this.TextDepthpMenuItem,
             this.ToolStripSeparator1,
             this.NewInstanceMenuItem,
+            this.AvailableInstanceMenuItem,
+            this.DeleteInstanceMenuItem,
             this.toolStripSeparator2,
             this.ExitMenuItem});
             this.SettingsContextMenu.Name = "SettingsContextMenu";
-            this.SettingsContextMenu.Size = new System.Drawing.Size(181, 248);
+            this.SettingsContextMenu.Size = new System.Drawing.Size(181, 314);
+            this.SettingsContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.SettingsContextMenu_Opening);
             this.SettingsContextMenu.MouseLeave += new System.EventHandler(this.Menu_MouseLeave);
             // 
             // ClockStyleMenuItem
             // 
             this.ClockStyleMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.StyleDeptMenuItem,
-            this.StyleBorderMenuItem});
+            this.StyleBorderMenuItem,
+            this.toolStripSeparator5,
+            this.StyleCounterMenuItem});
             this.ClockStyleMenuItem.Name = "ClockStyleMenuItem";
             this.ClockStyleMenuItem.Size = new System.Drawing.Size(180, 22);
             this.ClockStyleMenuItem.Text = "Clock &Style";
@@ -123,7 +135,7 @@ namespace SwitchWinClock
             this.StyleDeptMenuItem.CheckOnClick = true;
             this.StyleDeptMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.StyleDeptMenuItem.Name = "StyleDeptMenuItem";
-            this.StyleDeptMenuItem.Size = new System.Drawing.Size(109, 22);
+            this.StyleDeptMenuItem.Size = new System.Drawing.Size(141, 22);
             this.StyleDeptMenuItem.Text = "&Depth";
             this.StyleDeptMenuItem.Click += new System.EventHandler(this.StyleDeptMenuItem_Click);
             // 
@@ -132,9 +144,24 @@ namespace SwitchWinClock
             this.StyleBorderMenuItem.CheckOnClick = true;
             this.StyleBorderMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.StyleBorderMenuItem.Name = "StyleBorderMenuItem";
-            this.StyleBorderMenuItem.Size = new System.Drawing.Size(109, 22);
+            this.StyleBorderMenuItem.Size = new System.Drawing.Size(141, 22);
             this.StyleBorderMenuItem.Text = "&Border";
             this.StyleBorderMenuItem.Click += new System.EventHandler(this.StyleBorderMenuItem_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(138, 6);
+            this.toolStripSeparator5.Visible = false;
+            // 
+            // StyleCounterMenuItem
+            // 
+            this.StyleCounterMenuItem.CheckOnClick = true;
+            this.StyleCounterMenuItem.Name = "StyleCounterMenuItem";
+            this.StyleCounterMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.StyleCounterMenuItem.Text = "&Count Down";
+            this.StyleCounterMenuItem.Visible = false;
+            this.StyleCounterMenuItem.Click += new System.EventHandler(this.StyleCounterMenuItem_Click);
             // 
             // FontSetupMenuItem
             // 
@@ -142,6 +169,24 @@ namespace SwitchWinClock
             this.FontSetupMenuItem.Size = new System.Drawing.Size(180, 22);
             this.FontSetupMenuItem.Text = "&Font Settings";
             this.FontSetupMenuItem.Click += new System.EventHandler(this.FontSetupMenuItem_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
+            // 
+            // AlwaysOnTopMenuItem
+            // 
+            this.AlwaysOnTopMenuItem.CheckOnClick = true;
+            this.AlwaysOnTopMenuItem.Name = "AlwaysOnTopMenuItem";
+            this.AlwaysOnTopMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.AlwaysOnTopMenuItem.Text = "&Always On Top";
+            this.AlwaysOnTopMenuItem.Click += new System.EventHandler(this.AlwaysOnTopMenuItem_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
             // 
             // WinAlignmentMenuItem
             // 
@@ -162,9 +207,7 @@ namespace SwitchWinClock
             // 
             // WinAlignManualMenuItem
             // 
-            this.WinAlignManualMenuItem.Checked = true;
             this.WinAlignManualMenuItem.CheckOnClick = true;
-            this.WinAlignManualMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.WinAlignManualMenuItem.Name = "WinAlignManualMenuItem";
             this.WinAlignManualMenuItem.Size = new System.Drawing.Size(152, 22);
             this.WinAlignManualMenuItem.Text = "&Manual";
@@ -296,6 +339,22 @@ namespace SwitchWinClock
             this.PresetDateFormatItem4.Size = new System.Drawing.Size(227, 22);
             this.PresetDateFormatItem4.Text = "dddd, MMM dd";
             this.PresetDateFormatItem4.Click += new System.EventHandler(this.DateFormatItem_Click);
+            // 
+            // CounterFormattingMenuItem
+            // 
+            this.CounterFormattingMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.CounterYMDHMSMenuItem});
+            this.CounterFormattingMenuItem.Name = "CounterFormattingMenuItem";
+            this.CounterFormattingMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.CounterFormattingMenuItem.Text = "&Counter Formatting";
+            this.CounterFormattingMenuItem.Visible = false;
+            // 
+            // CounterYMDHMSMenuItem
+            // 
+            this.CounterYMDHMSMenuItem.Name = "CounterYMDHMSMenuItem";
+            this.CounterYMDHMSMenuItem.Size = new System.Drawing.Size(316, 22);
+            this.CounterYMDHMSMenuItem.Tag = "yy(\\y), MM(\\mo), dd(\\d), HH(h), mm(\\mi), ss(\\s)";
+            this.CounterYMDHMSMenuItem.Text = "Years, Months, Days, Hours, Minutes, Seconds";
             // 
             // ColorSetupMenuItem
             // 
@@ -504,6 +563,19 @@ namespace SwitchWinClock
             this.NewInstanceMenuItem.Text = "&New Instance";
             this.NewInstanceMenuItem.Click += new System.EventHandler(this.NewInstanceMenuItem_Click);
             // 
+            // AvailableInstanceMenuItem
+            // 
+            this.AvailableInstanceMenuItem.Name = "AvailableInstanceMenuItem";
+            this.AvailableInstanceMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.AvailableInstanceMenuItem.Text = "A&vailable Instance";
+            // 
+            // DeleteInstanceMenuItem
+            // 
+            this.DeleteInstanceMenuItem.Name = "DeleteInstanceMenuItem";
+            this.DeleteInstanceMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.DeleteInstanceMenuItem.Text = "D&elete Instance";
+            this.DeleteInstanceMenuItem.Click += new System.EventHandler(this.DeleteInstanceMenuItem_Click);
+            // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
@@ -515,24 +587,6 @@ namespace SwitchWinClock
             this.ExitMenuItem.Size = new System.Drawing.Size(180, 22);
             this.ExitMenuItem.Text = "E&xit";
             this.ExitMenuItem.Click += new System.EventHandler(this.ExitMenuItem_Click);
-            // 
-            // AlwaysOnTopMenuItem
-            // 
-            this.AlwaysOnTopMenuItem.CheckOnClick = true;
-            this.AlwaysOnTopMenuItem.Name = "AlwaysOnTopMenuItem";
-            this.AlwaysOnTopMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.AlwaysOnTopMenuItem.Text = "&Always On Top";
-            this.AlwaysOnTopMenuItem.Click += new System.EventHandler(this.AlwaysOnTopMenuItem_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
             // 
             // DisplayForm
             // 
@@ -615,6 +669,12 @@ namespace SwitchWinClock
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem AlwaysOnTopMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripMenuItem DeleteInstanceMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripMenuItem StyleCounterMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem CounterFormattingMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem CounterYMDHMSMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem AvailableInstanceMenuItem;
     }
 }
 

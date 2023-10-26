@@ -1,8 +1,11 @@
 ﻿using SwitchWinClock.utils;
 using System;
+using System.Net;
 using System.Data;
 using System.Drawing;
 using System.Reflection;
+using System.Collections.Generic;
+using System.Security.Cryptography;
 
 namespace SwitchWinClock
 {
@@ -17,6 +20,7 @@ namespace SwitchWinClock
     {
         const string SETTINGS_TABLE = "Settings";
         private readonly string[] RefreshDataErrors = new string[] { "does not belong", "column missing" };
+        private readonly Random Rndize;
 
         private static JSONData _jSON;
         private static DataTable _DataTable = new DataTable();
@@ -35,11 +39,17 @@ namespace SwitchWinClock
         private bool _ManualWinAlignment = true;
         private int _DeviceNumber = 1;
         private bool _AlwaysOnTop = false;
+        private DateTime _ImAlive = DateTime.UtcNow;
 
         public SCConfig() 
         {
-            _jSON = new JSONData(new System.Net.NetworkCredential("SWClock.config", ""));
-            _DataTable = _jSON.GetTable($"{SETTINGS_TABLE}{Global.AppID}");
+            _jSON = new JSONData(new NetworkCredential(Global.ConfigFileName, ""));
+            _DataTable = _jSON.GetTable(SETTINGS_TABLE);
+
+            if (int.TryParse(DateTime.UtcNow.Ticks.ToString(), out int tickInt))
+                Rndize = new Random(tickInt);
+            else
+                Rndize = new Random(DateTime.UtcNow.Millisecond);
 
             if (_DataTable == null || _DataTable?.Rows.Count == 0)
                 Update();   //will create table and add 1 record based on default.
@@ -55,7 +65,6 @@ namespace SwitchWinClock
             //shutdown log location.
             Log.WriteLine(SMsgType.Information, $"[ColNames.FormLocation] = {_FormLocation}");
         }
-
         public Clock_Style ClockStyle 
         { 
             get { return _ClockStyle; } 
@@ -196,6 +205,23 @@ namespace SwitchWinClock
                 Update();
             }
         }
+        public void ImAlive()
+        {
+            if (_DataTable?.Rows.Count == 1)
+            {
+                //lets not beat the jks to death, shall we. also making
+                //sure each instance doesn't step on each other constantly.
+                int sec = Rndize.Next(1, Global.MaxImAliveSeconds);
+
+                if (_ImAlive <= DateTime.UtcNow.AddSeconds(-sec))
+                {
+                    _ImAlive = DateTime.UtcNow;
+                    DataRow dRow = _DataTable.Rows[0];
+                    dRow[ColNames.ImAlive] = _ImAlive;
+                    _jSON.UpdateTable(_DataTable);
+                }
+            }
+        }
         private void LoadData()
         {
             if(!ValidColums())
@@ -217,6 +243,7 @@ namespace SwitchWinClock
                 _WinAlignment = _jSON.GetColumn<ContentAlignment>(dRow, ColNames.WinAlignment, _WinAlignment);
                 _DeviceNumber = _jSON.GetColumn<int>(dRow, ColNames.DeviceNumber, _DeviceNumber);
                 _AlwaysOnTop = _jSON.GetColumn<bool>(dRow, ColNames.AlwaysOnTop, _AlwaysOnTop);
+                _ImAlive = _jSON.GetColumn<DateTime>(dRow, ColNames.ImAlive, _ImAlive);
             }
 
             /*
@@ -255,7 +282,7 @@ namespace SwitchWinClock
             Log.WriteLine(SMsgType.Debug, "Update called...");
             DataRow dRow;
 
-            if (_DataTable == null)
+            if (_DataTable == null || _DataTable.Columns.Count == 0)
                 CreateDataTable();
 
             //should never have more than one record.  If it does, delete
@@ -284,6 +311,7 @@ namespace SwitchWinClock
             dRow[ColNames.WinAlignment] = _WinAlignment;
             dRow[ColNames.DeviceNumber] = _DeviceNumber;
             dRow[ColNames.AlwaysOnTop] = _AlwaysOnTop;
+            dRow[ColNames.ImAlive] = _ImAlive;
 
             if (_DataTable.Rows.Count == 0)
                 _DataTable.Rows.Add(dRow);  //add record to table.
@@ -293,9 +321,9 @@ namespace SwitchWinClock
         }
         private void CreateDataTable()
         {
-            Log.WriteLine(SMsgType.Information, $"Creating table: {SETTINGS_TABLE}{Global.AppID}...");
+            Log.WriteLine(SMsgType.Information, $"Creating table: {SETTINGS_TABLE} for ({Global.AppID})...");
             if(_DataTable == null)
-                _DataTable = new DataTable($"{SETTINGS_TABLE}{Global.AppID}");
+                _DataTable = new DataTable($"{SETTINGS_TABLE}");
             if(!_DataTable.Columns.Contains(ColNames.ClockStyle))
                 _DataTable.Columns.Add(new DataColumn(ColNames.ClockStyle, typeof(Clock_Style)));
             if (!_DataTable.Columns.Contains(ColNames.DateFormat))
@@ -324,7 +352,9 @@ namespace SwitchWinClock
                 _DataTable.Columns.Add(new DataColumn(ColNames.DeviceNumber, typeof(int)));
             if (!_DataTable.Columns.Contains(ColNames.AlwaysOnTop))
                 _DataTable.Columns.Add(new DataColumn(ColNames.AlwaysOnTop, typeof(bool)));
-            Log.WriteLine(SMsgType.Information, $"Created table: {SETTINGS_TABLE}{Global.AppID}...");
+            if (!_DataTable.Columns.Contains(ColNames.ImAlive))
+                _DataTable.Columns.Add(new DataColumn(ColNames.ImAlive, typeof(DateTime)));
+            Log.WriteLine(SMsgType.Information, $"Created table: {SETTINGS_TABLE} for ({Global.AppID})...");
         }
         private bool ValidColums()
         {

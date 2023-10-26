@@ -1,23 +1,32 @@
-﻿using SwitchWinClock.utils;
-using System;
-using System.Diagnostics;
+﻿using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
+using System.Diagnostics;
+using System.Drawing.Text;
 using System.Windows.Forms;
+using System.Drawing.Drawing2D;
+using System.Text.RegularExpressions;
+using SwitchWinClock.utils;
+using System.IO;
+using System.Linq;
 
 namespace SwitchWinClock
 {
     public partial class DisplayForm : Form
     {
+#if DEBUG
+        const string mutexExt = "Debug";
+#else
+        const string mutexExt = "Release";
+#endif
+
         delegate void VoidDelegate();
         private static bool m_closingForm = false;
 
         private readonly Font ButtonFont = new Font("Arial Black", 10F, FontStyle.Regular, GraphicsUnit.Pixel);
         private readonly SCConfig config = new SCConfig();
         private readonly Screen[] m_allScreens = Screen.AllScreens;
+        private static SLog Log = null;
 
         private FontObject m_fontObject;
         private int m_waitTimer = 60000;  //default: 1 min
@@ -25,6 +34,7 @@ namespace SwitchWinClock
         public DisplayForm()
         {
             InitializeComponent();
+            Log = new SLog(SMsgType.Debug);
 
             this.SetupMenuChecks();
             this.SetCheckTextDepth(config.TextBorderDepth);
@@ -191,6 +201,8 @@ namespace SwitchWinClock
                 if(!this.Drag)
                     this.SetFormLocation();
 
+                config.ImAlive();
+
                 this.Invalidate();
             }
         }
@@ -291,16 +303,51 @@ namespace SwitchWinClock
         private Point StartPoint { get; set; } = Point.Empty;
         private void Menu_MouseLeave(object sender, EventArgs e)
         {
+            Log.WriteLine("Refreshing Form");
+            RefreshForm();
             //SettingsContextMenu.Hide();
+        }
+        private void RefreshInstancesMenu()
+        {
+            AvailableInstanceMenuItem.DropDownItems.Clear();
+
+            string appName = $"{About.AppTitle.Replace(" ", "")}{mutexExt}";
+            for (int id = 1; id <= 10; id++)
+            {
+                FileInfo fi = new FileInfo($"SWClock{id:00}.config");
+                if (!Global.AppID.Equals(id) && fi.Exists && fi.LastWriteTimeUtc<DateTime.UtcNow.AddSeconds(-Global.MaxImAliveSeconds))
+                {
+                    //pull DateFormat only from others file.
+                    string[] formats = File.ReadAllLines(fi.FullName).Where(w=>w.IndexOf("DateFormat\":") >-1).ToArray();
+                    if (formats.Length > 0)
+                    {
+                        // "DateFormat": "dddd, MMM dd, hh:mm:ss tt",
+                        // (0)'<blank>', (1) 'DateFormat', (2)': ', (3)'dddd, MMM dd, hh:mm:ss tt', (4)','
+
+                        string[] splitter = formats[0].Split('\"');
+                        string format = splitter[splitter.Length - 2];
+
+                        var tsmi = new ToolStripMenuItem(format)
+                        {
+                            Tag = id.ToString("00")
+                        };
+                        tsmi.Click += new EventHandler(AvaiInstance_Click);
+                        AvailableInstanceMenuItem.DropDownItems.Add(tsmi);
+                    }
+                }
+            }
         }
         private void Form_Load(object sender, EventArgs e)
         {
+            Log.WriteLine("Starting application form.");
+            RefreshInstancesMenu();
             SWCEvents = new AutoResetEvent[]
             {
                 new AutoResetEvent(false),  //EVENT_SHUTDOWN
                 new AutoResetEvent(false),  //EVENT_MANUAL
             };
 
+            Log.WriteLine("Starting Counter Thread.");
             Thread thread = new Thread(() => { StartCounter(); });
             thread.Start();
         }
@@ -460,12 +507,15 @@ namespace SwitchWinClock
                     }
                 }
             }
-            
-            if (this.Drag)
+
+            if (this.Drag) {
                 this.Drag = false;  //shouldn't be set.
+                RefreshForm();
+            }
         }
         private void Form_Closing(object sender, EventArgs e)
         {
+            Log.WriteLine("Application Closing down.");
             m_closingForm = true;
             SWCEvents[EventTypes.EVENT_SHUTDOWN].Set();
         }
@@ -484,14 +534,25 @@ namespace SwitchWinClock
                 fontDialog.Color = config.ForeColor;
 
                 if (fontDialog.ShowDialog() == DialogResult.OK)
+                {
                     FontApply(fontDialog, e);
+                    RefreshForm();
+                }
             }
+        }
+        private void AvaiInstance_Click(object sender, EventArgs e)
+        {
+            var tsi = sender as ToolStripItem;
+            string tag = tsi.Tag as string;
+
+            Global.RunApp(file: About.AppPath, args: tag);
         }
         private void FontApply(object sender, EventArgs e)
         {
             var fd = sender as FontDialog;
             config.Font = fd.Font;
             config.ForeColor = fd.Color;
+            RefreshForm();
         }
         private void TextDepthp_Click(object sender, EventArgs e)
         {
@@ -592,12 +653,15 @@ namespace SwitchWinClock
                 config.DateFormat = CustomDateTextBox.Text.Trim();
             if (e.KeyCode == Keys.Escape || e.KeyCode == Keys.Enter)
                 SetDateFormatMenus();
+            
+            RefreshForm();
         }
         private void DateFormatItem_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem menuItem = ((ToolStripMenuItem)sender);
             menuItem.Checked = !menuItem.Checked;
             SetDateFormatMenus(menuItem);
+            RefreshForm();
         }
         private void ForeColorSetMenuItem_Click(object sender, EventArgs e)
         {
@@ -635,12 +699,31 @@ namespace SwitchWinClock
         }
         private void NewInstanceMenuItem_Click(object sender, EventArgs e)
         {
-            Global.RunApp(file: About.AppPath, args: "1");
+            bool foundNew = false;
+            for (int id = 1; id <= Global.MaxImAliveSeconds; id++)
+            {
+                if (!Global.AppID.Equals(id) && !File.Exists($"SWClock{id:00}.config"))
+                {
+                    foundNew = true;
+                    Global.RunApp(file: About.AppPath, args: id.ToString());
+                    break;
+                }
+            }
+
+            if (!foundNew)
+                MessageBox.Show($"No new instances available.  {Global.MaxImAliveSeconds} is the max instances count. Please delete some to create new or change existing.");
+        }
+        private void DeleteInstanceMenuItem_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(Global.ConfigFileName))
+            {
+                File.Delete(Global.ConfigFileName);
+                this.Close();
+            }
         }
         private void WinAlignMenuItems_Click(object sender, EventArgs e)
         {
             var winAlignSel = sender as ToolStripMenuItem;
-            Type t = sender.GetType();
             var menuItemName = ((ToolStripMenuItem)sender).Name.Replace("WinAlign", "").Replace("MenuItem", "");
 
             if (!winAlignSel.Checked)
@@ -658,13 +741,18 @@ namespace SwitchWinClock
                 else if(winAlignSel.Name.Equals(tsmi.Name))
                 {
                     if (Enum.TryParse(menuItemName, out ContentAlignment winAlign))
+                    {
+                        Log.WriteLine($"WinAlignment changing: From: {config.WinAlignment} To: {winAlign}");
                         config.WinAlignment = winAlign;
+                    }
                 }
             }
         }
         private void SetWinAlignCheckDefault()
         {
             string winAlign2Check = config.WinAlignment.ToString();
+            if (config.ManualWinAlignment)
+                winAlign2Check = "Manual";
 
             foreach (ToolStripMenuItem tsmi in this.WinAlignmentMenuItem.DropDownItems)
             {
@@ -678,6 +766,14 @@ namespace SwitchWinClock
         {
             this.TopMost = this.AlwaysOnTopMenuItem.Checked;
             config.AlwaysOnTop = this.TopMost;
+        }
+        private void StyleCounterMenuItem_Click(object sender, EventArgs e)
+        {
+            //TODO
+        }
+        private void SettingsContextMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            RefreshInstancesMenu();
         }
     }
 }

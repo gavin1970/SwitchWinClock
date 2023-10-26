@@ -19,44 +19,11 @@ namespace SwitchWinClock.utils
         public JSONData(NetworkCredential connectionString)
         {
             ConnectionString = connectionString;
-            CleanupParams(GetSecure(ConnectionString.UserName).SecurePassword);
+            Startup();
         }
         #endregion
 
-        /// <summary>
-        /// Clean up parameters.
-        /// </summary>
-        /// <param name="connectionString"></param>
-        private void CleanupParams(SecureString connectionString)
-        {
-            //lets parse the connection string to see if we find a timeout within it.
-            char[] seps = new char[] { ';' };
-            string[] connArray = ConnectionString.UserName.Split(seps, StringSplitOptions.RemoveEmptyEntries);
-            //loop through what we found.
-            foreach (string value in connArray)
-            {
-                string[] connValue = value.Trim().Split('=');
-
-                if (connValue.Length < 2)
-                    continue;
-
-                switch (connValue[0].ToLower().Trim())
-                {
-                    case "file":
-                        //get the value of timeout
-                        ConnectionString.UserName = connValue[1].Trim();
-                        break;
-                }
-
-                if (!string.IsNullOrWhiteSpace(ConnectionString.UserName))
-                    break;
-            }
-
-            CheckFilePath();
-            SetFileMonitor();
-        }
-
-        #region Everthing JSON
+        #region Everthing Json
         /// <summary>
         /// Save Json file to disk.
         /// </summary>
@@ -66,16 +33,24 @@ namespace SwitchWinClock.utils
         {
             return SaveJsonData(jsonData);
         }
-
         /// <summary>
         /// Get all raw data via JSON
         /// </summary>
         /// <param name="string"></param>
         /// <returns></returns>
-        public string GetJson(string passwordColumns = null, SecureString password = null)
+        public string GetJson()
         {
             CheckFilePath();
-            return GetJsonData(passwordColumns, password);
+            return GetJsonData();
+        }
+
+        /// <summary>
+        /// Check up and Set up monitor.
+        /// </summary>
+        private void Startup()
+        {
+            CheckFilePath();
+            SetFileMonitor();
         }
         #endregion
 
@@ -88,11 +63,13 @@ namespace SwitchWinClock.utils
         public void SetDatasetName(string dataSetName)
         {
             CheckFilePath();
-
-            if (RecordData == null)
-                RecordData = new DataSet(dataSetName);
-            else
-                RecordData.DataSetName = dataSetName;
+            lock (DSetLock)
+            {
+                if (RecordData == null)
+                    RecordData = new DataSet(dataSetName);
+                else
+                    RecordData.DataSetName = dataSetName;
+            }
         }
 
         /// <summary>
@@ -143,11 +120,19 @@ namespace SwitchWinClock.utils
             List<string> tableNames = new List<string>();
 
             //we don't want send this back to caller since it's an internal table.
-            if (RecordData.Tables.Contains(SCHEMA_TABLE_NAME))
-                RecordData.Tables.Remove(SCHEMA_TABLE_NAME);
+            lock (DSetLock)
+            {
+                DataSet ds = RecordData.Copy();
 
-            foreach (DataTable dt in RecordData.Tables)
-                tableNames.Add(dt.TableName);
+                if (ds.Tables.Contains(SCHEMA_TABLE_NAME))
+                    ds.Tables.Remove(SCHEMA_TABLE_NAME);
+
+                foreach (DataTable dt in ds.Tables)
+                    tableNames.Add(dt.TableName);
+
+                //clear up.
+                ds.Dispose();
+            }
 
             if (sort)
                 tableNames.Sort();
@@ -164,9 +149,12 @@ namespace SwitchWinClock.utils
         {
             CheckFilePath();
 
-            DataSet ds = RecordData;
-            if (ds.Tables.Contains(newTable.TableName))
-                ThrowException("Table name already exists.");
+            lock (DSetLock)
+            {
+                DataSet ds = RecordData;
+                if (ds.Tables.Contains(newTable.TableName))
+                    ThrowException("Table name already exists.");
+            }
 
             return UpdateTable(newTable);
         }
@@ -215,14 +203,16 @@ namespace SwitchWinClock.utils
         {
             CheckFilePath();
 
-            DataSet ds = RecordData;
-            if (ds != null && ds.Tables.Count > 0)
+            lock (DSetLock)
             {
-                if (ds.Tables.Contains(tableName))
-                    return ds.Tables[tableName].Copy();
+                if (RecordData != null && RecordData.Tables.Count > 0)
+                {
+                    if (RecordData.Tables.Contains(tableName))
+                        return RecordData.Tables[tableName];
+                }
             }
 
-            return null;
+            return new DataTable(tableName);
         }
 
         /// <summary>
@@ -235,17 +225,17 @@ namespace SwitchWinClock.utils
             if (string.IsNullOrWhiteSpace(newTable.TableName))
                 ThrowException("newTable.TableName is required to be set.");
 
-            DataTable dataTable = newTable.Copy();
-            DataSet ds = DropTable(newTable.TableName);
+            lock (DSetLock)
+            {
+                if (RecordData != null && RecordData.Tables.Contains(newTable.TableName))
+                    RecordData.Tables.Remove(newTable.TableName);
 
-            ds.Tables.Add(dataTable);
-
-            lock (DbLock)
-                RecordData = ds;
+                RecordData.Tables.Add(newTable.Copy());
+                newTable.Dispose();
+            }
 
             return SaveData();
         }
-
         /// <summary>
         /// Delte Data table
         /// </summary>
@@ -256,33 +246,31 @@ namespace SwitchWinClock.utils
             if (string.IsNullOrWhiteSpace(newTable.TableName))
                 ThrowException("newTable.TableName is required to be set.");
 
-            lock (DbLock)
-                RecordData = DropTable(newTable.TableName);
-
-            return SaveData();
+            ResultStatus rs = DropTable(newTable.TableName);
+            if (rs.Status != RESULT_STATUS.OK)
+                return rs;
+            else
+                return SaveData();
         }
-
         /// <summary>
         /// get DataSet and remove dataset, even if empty.
         /// </summary>
         /// <param name="tableName"></param>
         /// <returns></returns>
-        private DataSet DropTable(string tableName)
+        public ResultStatus DropTable(string tableName)
         {
             if (string.IsNullOrWhiteSpace(tableName))
                 ThrowException("TableName is required to be set.");
 
             CheckFilePath();
 
-            DataSet ds = RecordData;
+            lock (DSetLock)
+            {
+                if (RecordData != null && RecordData.Tables.Contains(tableName))
+                    RecordData.Tables.Remove(tableName);
+            }
 
-            if (ds == null)
-                ds = new DataSet();
-
-            if (ds.Tables.Contains(tableName))
-                ds.Tables.Remove(tableName);
-
-            return ds;
+            return SaveData();
         }
         #endregion
 
@@ -310,7 +298,6 @@ namespace SwitchWinClock.utils
             DataTable dt = GetTable(tableName);
             return dt.Select(where, orderBy);
         }
-
         /// <summary>
         /// Delete Record from Table
         /// </summary>
@@ -333,7 +320,6 @@ namespace SwitchWinClock.utils
 
             return UpdateTable(dt);
         }
-
         /// <summary>
         /// Update specific record/records
         /// </summary>
@@ -367,7 +353,6 @@ namespace SwitchWinClock.utils
                 else if (dt == null && createTable)
                 {
                     CreateTable(tableName, fieldValues);
-                    retVal.Description = "Success";
                     return retVal;
                 }
                 else if (dt == null)
@@ -399,8 +384,11 @@ namespace SwitchWinClock.utils
                     dt.Rows.Add(newRow);
                 }
 
-                RecordData.Tables.Remove(tableName);
-                RecordData.Tables.Add(dt);
+                lock (DSetLock)
+                {
+                    RecordData.Tables.Remove(tableName);
+                    RecordData.Tables.Add(dt);
+                }
                 SaveData();
             }
             catch (Exception ex)
@@ -414,5 +402,4 @@ namespace SwitchWinClock.utils
         }
         #endregion
     }
-
 }
