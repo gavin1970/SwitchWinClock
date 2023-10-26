@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Threading;
 using System.Diagnostics;
 using System.Drawing.Text;
+using System.ComponentModel;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Text.RegularExpressions;
@@ -42,6 +43,9 @@ namespace SwitchWinClock
             this.SetFormLocation();
             this.SetWinAlignCheckDefault();
         }
+        private AutoResetEvent[] SWCEvents { get; set; } = null;    //could be shut down event or new message event
+        private bool Drag { get; set; }
+        private Point StartPoint { get; set; } = Point.Empty;
         private StringFormat GetTextAlignment()
         {
             StringFormat stringFormat;
@@ -105,9 +109,9 @@ namespace SwitchWinClock
         {
             Rectangle rect = new Rectangle() { X = 0, Y = 0, Width = sz.Width, Height = sz.Height };
 
-            if (config.BackColor.A != 0)
+            if (config.BackColor.A != 0)            // if not clear
                 g.FillRectangle(new SolidBrush(config.BackColor), rect);
-            if (config.FormBorderColor.A != 0)
+            if (config.FormBorderColor.A != 0)      // if not clear
                 g.DrawRectangle(new Pen(config.FormBorderColor, 2), rect);
         }
         private void DrawCloseButton(Graphics g, StringFormat sFormat)
@@ -298,9 +302,6 @@ namespace SwitchWinClock
             SetWaitTimer();
         }
 
-        private AutoResetEvent[] SWCEvents { get; set; } = null;                               //could be shut down event or new message event
-        private bool Drag { get; set; }
-        private Point StartPoint { get; set; } = Point.Empty;
         private void Menu_MouseLeave(object sender, EventArgs e)
         {
             Log.WriteLine("Refreshing Form");
@@ -715,7 +716,12 @@ namespace SwitchWinClock
         }
         private void DeleteInstanceMenuItem_Click(object sender, EventArgs e)
         {
-            if (File.Exists(Global.ConfigFileName))
+            if(File.Exists(Global.ConfigFileName) 
+                && MessageBox.Show(this, 
+                        "Are you sure you want to delete this clock instance?\n\nNote: No other instance of this clock will be changed.", 
+                        "Delete an Instance", 
+                        MessageBoxButtons.YesNo, 
+                        MessageBoxIcon.Question) == DialogResult.Yes) 
             {
                 File.Delete(Global.ConfigFileName);
                 this.Close();
@@ -771,7 +777,7 @@ namespace SwitchWinClock
         {
             //TODO
         }
-        private void SettingsContextMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        private void SettingsContextMenu_Opening(object sender, CancelEventArgs e)
         {
             RefreshInstancesMenu();
         }

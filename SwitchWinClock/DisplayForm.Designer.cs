@@ -115,7 +115,7 @@ namespace SwitchWinClock
             this.toolStripSeparator2,
             this.ExitMenuItem});
             this.SettingsContextMenu.Name = "SettingsContextMenu";
-            this.SettingsContextMenu.Size = new System.Drawing.Size(181, 314);
+            this.SettingsContextMenu.Size = new System.Drawing.Size(180, 292);
             this.SettingsContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.SettingsContextMenu_Opening);
             this.SettingsContextMenu.MouseLeave += new System.EventHandler(this.Menu_MouseLeave);
             // 
@@ -127,7 +127,7 @@ namespace SwitchWinClock
             this.toolStripSeparator5,
             this.StyleCounterMenuItem});
             this.ClockStyleMenuItem.Name = "ClockStyleMenuItem";
-            this.ClockStyleMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ClockStyleMenuItem.Size = new System.Drawing.Size(179, 22);
             this.ClockStyleMenuItem.Text = "Clock &Style";
             // 
             // StyleDeptMenuItem
@@ -166,27 +166,27 @@ namespace SwitchWinClock
             // FontSetupMenuItem
             // 
             this.FontSetupMenuItem.Name = "FontSetupMenuItem";
-            this.FontSetupMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.FontSetupMenuItem.Size = new System.Drawing.Size(179, 22);
             this.FontSetupMenuItem.Text = "&Font Settings";
             this.FontSetupMenuItem.Click += new System.EventHandler(this.FontSetupMenuItem_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(176, 6);
             // 
             // AlwaysOnTopMenuItem
             // 
             this.AlwaysOnTopMenuItem.CheckOnClick = true;
             this.AlwaysOnTopMenuItem.Name = "AlwaysOnTopMenuItem";
-            this.AlwaysOnTopMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.AlwaysOnTopMenuItem.Size = new System.Drawing.Size(179, 22);
             this.AlwaysOnTopMenuItem.Text = "&Always On Top";
             this.AlwaysOnTopMenuItem.Click += new System.EventHandler(this.AlwaysOnTopMenuItem_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(176, 6);
             // 
             // WinAlignmentMenuItem
             // 
@@ -202,7 +202,7 @@ namespace SwitchWinClock
             this.WinAlignBottomCenterMenuItem,
             this.WinAlignBottomRightMenuItem});
             this.WinAlignmentMenuItem.Name = "WinAlignmentMenuItem";
-            this.WinAlignmentMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.WinAlignmentMenuItem.Size = new System.Drawing.Size(179, 22);
             this.WinAlignmentMenuItem.Text = "&Window Alignment";
             // 
             // WinAlignManualMenuItem
@@ -294,7 +294,7 @@ namespace SwitchWinClock
             this.PresetDateFormatItem3,
             this.PresetDateFormatItem4});
             this.DateFormattingMenuItem.Name = "DateFormattingMenuItem";
-            this.DateFormattingMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.DateFormattingMenuItem.Size = new System.Drawing.Size(179, 22);
             this.DateFormattingMenuItem.Text = "&Date Formating";
             // 
             // CustomDateFormatMenuItem
@@ -345,7 +345,7 @@ namespace SwitchWinClock
             this.CounterFormattingMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.CounterYMDHMSMenuItem});
             this.CounterFormattingMenuItem.Name = "CounterFormattingMenuItem";
-            this.CounterFormattingMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.CounterFormattingMenuItem.Size = new System.Drawing.Size(179, 22);
             this.CounterFormattingMenuItem.Text = "&Counter Formatting";
             this.CounterFormattingMenuItem.Visible = false;
             // 
@@ -364,7 +364,7 @@ namespace SwitchWinClock
             this.BorderColorMenuItem,
             this.TextBorderColorMenuItem});
             this.ColorSetupMenuItem.Name = "ColorSetupMenuItem";
-            this.ColorSetupMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ColorSetupMenuItem.Size = new System.Drawing.Size(179, 22);
             this.ColorSetupMenuItem.Text = "&Color Settings";
             // 
             // ForeColorMenuItem
@@ -476,7 +476,7 @@ namespace SwitchWinClock
             this.toolStripMenuItem8,
             this.toolStripMenuItem9});
             this.TextDepthpMenuItem.Name = "TextDepthpMenuItem";
-            this.TextDepthpMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.TextDepthpMenuItem.Size = new System.Drawing.Size(179, 22);
             this.TextDepthpMenuItem.Text = "&Text Depth";
             // 
             // toolStripMenuItem1
@@ -554,37 +554,37 @@ namespace SwitchWinClock
             // ToolStripSeparator1
             // 
             this.ToolStripSeparator1.Name = "ToolStripSeparator1";
-            this.ToolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.ToolStripSeparator1.Size = new System.Drawing.Size(176, 6);
             // 
             // NewInstanceMenuItem
             // 
             this.NewInstanceMenuItem.Name = "NewInstanceMenuItem";
-            this.NewInstanceMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.NewInstanceMenuItem.Size = new System.Drawing.Size(179, 22);
             this.NewInstanceMenuItem.Text = "&New Instance";
             this.NewInstanceMenuItem.Click += new System.EventHandler(this.NewInstanceMenuItem_Click);
             // 
             // AvailableInstanceMenuItem
             // 
             this.AvailableInstanceMenuItem.Name = "AvailableInstanceMenuItem";
-            this.AvailableInstanceMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.AvailableInstanceMenuItem.Size = new System.Drawing.Size(179, 22);
             this.AvailableInstanceMenuItem.Text = "A&vailable Instance";
             // 
             // DeleteInstanceMenuItem
             // 
             this.DeleteInstanceMenuItem.Name = "DeleteInstanceMenuItem";
-            this.DeleteInstanceMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.DeleteInstanceMenuItem.Size = new System.Drawing.Size(179, 22);
             this.DeleteInstanceMenuItem.Text = "D&elete Instance";
             this.DeleteInstanceMenuItem.Click += new System.EventHandler(this.DeleteInstanceMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(176, 6);
             // 
             // ExitMenuItem
             // 
             this.ExitMenuItem.Name = "ExitMenuItem";
-            this.ExitMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ExitMenuItem.Size = new System.Drawing.Size(179, 22);
             this.ExitMenuItem.Text = "E&xit";
             this.ExitMenuItem.Click += new System.EventHandler(this.ExitMenuItem_Click);
             // 
