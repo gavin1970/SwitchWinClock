@@ -11,6 +11,7 @@ namespace SwitchWinClock.utils
 
     internal class ColNames
     {
+        public const string InstanceName = "InstanceName";
         public const string ClockStyle = "ClockStyle";
         public const string DateFormat = "DateFormat";
         public const string FormLocation = "FormLocation";

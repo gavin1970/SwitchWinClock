@@ -4,8 +4,6 @@ using System.Net;
 using System.Data;
 using System.Drawing;
 using System.Reflection;
-using System.Collections.Generic;
-using System.Security.Cryptography;
 
 namespace SwitchWinClock
 {
@@ -26,6 +24,7 @@ namespace SwitchWinClock
         private static DataTable _DataTable = new DataTable();
         private SLog Log = new SLog();
         private Clock_Style _ClockStyle = Clock_Style.Depth;
+        private string _InstanceName = Global.DefaultInstanceName;
         private string _DateFormat = "dddd, MMM dd, hh:mm:ss tt";
         private Point _FormLocation = new Point(0, 0);
         private Font _Font = new Font("Arial", 72F, FontStyle.Bold);
@@ -63,8 +62,19 @@ namespace SwitchWinClock
         ~SCConfig()
         {
             //shutdown log location.
-            Log.WriteLine(SMsgType.Information, $"[ColNames.FormLocation] = {_FormLocation}");
+            Log.WriteLine(SMsgType.Information, $"Shutting down: {Global.AppID}");
         }
+        public string InstanceName
+        {
+            get { return _InstanceName; }
+            set
+            {
+                _InstanceName = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.InstanceName] = {_InstanceName}");
+                Update();
+            }
+        }
+
         public Clock_Style ClockStyle 
         { 
             get { return _ClockStyle; } 
@@ -230,6 +240,7 @@ namespace SwitchWinClock
             foreach (DataRow dRow in _DataTable.Rows)
             {
                 _ClockStyle = _jSON.GetColumn<Clock_Style>(dRow, ColNames.ClockStyle, _ClockStyle);
+                _InstanceName = _jSON.GetColumn<string>(dRow, ColNames.InstanceName, _InstanceName);
                 _DateFormat = _jSON.GetColumn<string>(dRow, ColNames.DateFormat, _DateFormat);
                 _FormLocation = _jSON.GetColumn<Point>(dRow, ColNames.FormLocation, _FormLocation);
                 _Font = _jSON.GetColumn<Font>(dRow, ColNames.Font, _Font);
@@ -298,6 +309,7 @@ namespace SwitchWinClock
                 dRow = _DataTable.NewRow();
 
             dRow[ColNames.ClockStyle] = (int)_ClockStyle;
+            dRow[ColNames.InstanceName] = _InstanceName;
             dRow[ColNames.DateFormat] = _DateFormat;
             dRow[ColNames.FormLocation] = _FormLocation;
             dRow[ColNames.Font] = _Font;
@@ -326,6 +338,8 @@ namespace SwitchWinClock
                 _DataTable = new DataTable($"{SETTINGS_TABLE}");
             if(!_DataTable.Columns.Contains(ColNames.ClockStyle))
                 _DataTable.Columns.Add(new DataColumn(ColNames.ClockStyle, typeof(Clock_Style)));
+            if (!_DataTable.Columns.Contains(ColNames.InstanceName))
+                _DataTable.Columns.Add(new DataColumn(ColNames.InstanceName, typeof(string)));
             if (!_DataTable.Columns.Contains(ColNames.DateFormat))
                 _DataTable.Columns.Add(new DataColumn(ColNames.DateFormat, typeof(string)));
             if (!_DataTable.Columns.Contains(ColNames.FormLocation))

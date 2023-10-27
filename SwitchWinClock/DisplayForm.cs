@@ -37,11 +37,39 @@ namespace SwitchWinClock
             InitializeComponent();
             Log = new SLog(SMsgType.Debug);
 
+            if(config.InstanceName.Equals(Global.DefaultInstanceName))
+                SetInstanceName(true);
+
             this.SetupMenuChecks();
             this.SetCheckTextDepth(config.TextBorderDepth);
             this.SetDateFormatMenus();
             this.SetFormLocation();
             this.SetWinAlignCheckDefault();
+        }
+        private void SetInstanceName(bool isNew)
+        {
+            using (InstanceNameForm frm = new InstanceNameForm())
+            {
+                if(!config.InstanceName.Equals(Global.DefaultInstanceName))
+                    frm.InstanceName = config.InstanceName;
+
+                frm.ShowDialog(this);
+                if (frm.InstanceName.Equals(string.Empty))
+                {
+                    if (isNew)
+                    {
+                        if (File.Exists(Global.ConfigFileName))
+                            File.Delete(Global.ConfigFileName);
+                        
+                        this.Close();
+                        return;
+                    }
+                }
+                else
+                {
+                    config.InstanceName = frm.InstanceName;
+                }
+            }
         }
         private AutoResetEvent[] SWCEvents { get; set; } = null;    //could be shut down event or new message event
         private bool Drag { get; set; }
@@ -319,7 +347,7 @@ namespace SwitchWinClock
                 if (!Global.AppID.Equals(id) && fi.Exists && fi.LastWriteTimeUtc<DateTime.UtcNow.AddSeconds(-Global.MaxImAliveSeconds))
                 {
                     //pull DateFormat only from others file.
-                    string[] formats = File.ReadAllLines(fi.FullName).Where(w=>w.IndexOf("DateFormat\":") >-1).ToArray();
+                    string[] formats = File.ReadAllLines(fi.FullName).Where(w=>w.IndexOf("InstanceName\":") >-1).ToArray();
                     if (formats.Length > 0)
                     {
                         // "DateFormat": "dddd, MMM dd, hh:mm:ss tt",
@@ -780,6 +808,10 @@ namespace SwitchWinClock
         private void SettingsContextMenu_Opening(object sender, CancelEventArgs e)
         {
             RefreshInstancesMenu();
+        }
+        private void RenameInstanceMenuItem_Click(object sender, EventArgs e)
+        {
+            SetInstanceName(false);
         }
     }
 }
