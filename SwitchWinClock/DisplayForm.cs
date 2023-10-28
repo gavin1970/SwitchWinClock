@@ -346,8 +346,13 @@ namespace SwitchWinClock
                 FileInfo fi = new FileInfo($"SWClock{id:00}.config");
                 if (!Global.AppID.Equals(id) && fi.Exists && fi.LastWriteTimeUtc<DateTime.UtcNow.AddSeconds(-Global.MaxImAliveSeconds))
                 {
-                    //pull DateFormat only from others file.
-                    string[] formats = File.ReadAllLines(fi.FullName).Where(w=>w.IndexOf("InstanceName\":") >-1).ToArray();
+                    var allLines = File.ReadAllLines(fi.FullName);
+
+                    //pull InstanceName, if column is missing, get DateFormat only from others file.
+                    var formats = allLines.Where(w=>w.IndexOf($"{ColNames.InstanceName}\":") >-1).ToArray();
+                    if(formats.Length == 0)
+                        formats = allLines.Where(w => w.IndexOf($"{ColNames.DateFormat}\":") > -1).ToArray();
+
                     if (formats.Length > 0)
                     {
                         // "DateFormat": "dddd, MMM dd, hh:mm:ss tt",
