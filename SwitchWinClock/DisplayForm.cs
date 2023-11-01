@@ -37,8 +37,11 @@ namespace SwitchWinClock
             InitializeComponent();
             Log = new SLog(SMsgType.Debug);
 
-            if(config.InstanceName.Equals(Global.DefaultInstanceName))
-                SetInstanceName(true);
+            if (config.InstanceName.Equals(Global.DefaultInstanceName))
+            {
+                if (!SetInstanceName(true))
+                    return;
+            }
 
             this.SetupMenuChecks();
             this.SetCheckTextDepth(config.TextBorderDepth);
@@ -46,15 +49,15 @@ namespace SwitchWinClock
             this.SetFormLocation();
             this.SetWinAlignCheckDefault();
         }
-        private void SetInstanceName(bool isNew)
+        private bool SetInstanceName(bool isNew)
         {
             using (InstanceNameForm frm = new InstanceNameForm())
             {
                 if(!config.InstanceName.Equals(Global.DefaultInstanceName))
                     frm.InstanceName = config.InstanceName;
 
-                frm.ShowDialog(this);
-                if (frm.InstanceName.Equals(string.Empty))
+                DialogResult dr = frm.ShowDialog(this);
+                if (dr == DialogResult.Cancel || frm.InstanceName.Equals(string.Empty))
                 {
                     if (isNew)
                     {
@@ -62,7 +65,7 @@ namespace SwitchWinClock
                             File.Delete(Global.ConfigFileName);
                         
                         this.Close();
-                        return;
+                        return false;
                     }
                 }
                 else
@@ -70,6 +73,8 @@ namespace SwitchWinClock
                     config.InstanceName = frm.InstanceName;
                 }
             }
+
+            return true;
         }
         private AutoResetEvent[] SWCEvents { get; set; } = null;    //could be shut down event or new message event
         private bool Drag { get; set; }
@@ -370,6 +375,11 @@ namespace SwitchWinClock
                     }
                 }
             }
+
+            if (AvailableInstanceMenuItem.DropDownItems.Count == 0)
+                AvailableInstanceMenuItem.Visible = false;
+            else
+                AvailableInstanceMenuItem.Visible = true;
         }
         private void Form_Load(object sender, EventArgs e)
         {
@@ -547,11 +557,11 @@ namespace SwitchWinClock
                 RefreshForm();
             }
         }
-        private void Form_Closing(object sender, EventArgs e)
+        private void Form_Closing(object sender, FormClosingEventArgs e)
         {
             Log.WriteLine("Application Closing down.");
             m_closingForm = true;
-            SWCEvents[EventTypes.EVENT_SHUTDOWN].Set();
+            SWCEvents?[EventTypes.EVENT_SHUTDOWN].Set();
         }
         private void ExitMenuItem_Click(object sender, EventArgs e)
         {
