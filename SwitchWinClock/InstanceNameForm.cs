@@ -18,12 +18,14 @@ namespace SwitchWinClock
 
         private void BtnOK_Click(object sender, EventArgs e)
         {
+            DialogResult = DialogResult.OK;
             this.InstanceName = this.TxtInstanceName.Text.Trim();
             this.Close();
         }
 
         private void BtnCancel_Click(object sender, EventArgs e)
         {
+            DialogResult = DialogResult.Cancel;
             this.InstanceName = string.Empty;
             this.Close();
         }
