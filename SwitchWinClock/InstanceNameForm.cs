@@ -15,8 +15,6 @@ namespace SwitchWinClock
             InitializeComponent();
             foreach(TimeZoneSelection zone in SCConfig.GetTimeZones())
                 this.TimeZoneComboBox.Items.Add(zone.LocalName);
-
-            MessageBox.Show($"3 - {this.TimeZone}");
         }
 
         public string InstanceName { get; set; }

@@ -76,16 +76,12 @@ namespace SwitchWinClock
 
             using (InstanceNameForm frm = new InstanceNameForm())
             {
-                MessageBox.Show("1");
                 //if not default, meaning this is a rename
                 if (!config.InstanceName.Equals(Global.DefaultInstanceName))
                 {
-                    MessageBox.Show($"2 - {tzFound.LocalName}");
                     frm.InstanceName = config.InstanceName;
                     frm.TimeZone = tzFound.LocalName;
                 }
-                else
-                    MessageBox.Show($"2a - {config?.InstanceName}");
 
                 //load instance name and timezone.
                 DialogResult dr = frm.ShowDialog(this);
