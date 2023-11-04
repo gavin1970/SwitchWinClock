@@ -27,6 +27,8 @@ namespace SwitchWinClock.utils
         public const string DeviceNumber = "DeviceNumber";
         public const string AlwaysOnTop = "AlwaysOnTop";
         public const string ImAlive = "ImAlive";
+        public const string TimeZone = "TimeZone";
+
         internal static FieldInfo[] GetFields
         { 
             get 

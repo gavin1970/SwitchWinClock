@@ -81,6 +81,7 @@
     </Compile>
     <Compile Include="models\ResultStatus.cs" />
     <Compile Include="models\SLFV.cs" />
+    <Compile Include="models\TimeZoneSelection.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="services\SCConfig.cs" />

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SwitchWinClock.utils;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -12,14 +13,28 @@ namespace SwitchWinClock
         public InstanceNameForm()
         {
             InitializeComponent();
+            foreach(TimeZoneSelection zone in SCConfig.GetTimeZones())
+                this.TimeZoneComboBox.Items.Add(zone.LocalName);
+
+            MessageBox.Show($"3 - {this.TimeZone}");
         }
 
         public string InstanceName { get; set; }
+        public string TimeZone { get; set; }
 
         private void BtnOK_Click(object sender, EventArgs e)
         {
+            if(string.IsNullOrWhiteSpace(this.TxtInstanceName.Text))
+            {
+                MessageBox.Show("Provide an instance name or Cancel to exit.", "Missing Name", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             DialogResult = DialogResult.OK;
             this.InstanceName = this.TxtInstanceName.Text.Trim();
+
+            TimeZoneSelection tzFound = SCConfig.GetTimeZones().Find(f => f.LocalName == this.TimeZoneComboBox.Text) ?? Global.CurrentTimeZone();
+
+            this.TimeZone = tzFound.Id;
             this.Close();
         }
 
@@ -27,6 +42,7 @@ namespace SwitchWinClock
         {
             DialogResult = DialogResult.Cancel;
             this.InstanceName = string.Empty;
+            this.TimeZone = string.Empty;
             this.Close();
         }
 
@@ -34,6 +50,8 @@ namespace SwitchWinClock
         {
             if (!string.IsNullOrWhiteSpace(this.InstanceName))
                 this.TxtInstanceName.Text = this.InstanceName;
+            if (!string.IsNullOrWhiteSpace(this.TimeZone))
+                this.TimeZoneComboBox.Text = this.TimeZone;
         }
 
         private void Control_MouseDown(object sender, MouseEventArgs e)

@@ -4,6 +4,9 @@ using System.Net;
 using System.Data;
 using System.Drawing;
 using System.Reflection;
+using System.Collections.Generic;
+using SwitchWinClock.models;
+using System.Linq;
 
 namespace SwitchWinClock
 {
@@ -11,7 +14,9 @@ namespace SwitchWinClock
     public enum Clock_Style
     {
         Border = 0,
-        Depth = 1
+        Depth = 1,
+        Shadowed = 2,
+        Depth_Shadowed = 3
     }
 
     internal class SCConfig
@@ -20,6 +25,7 @@ namespace SwitchWinClock
         private readonly string[] RefreshDataErrors = new string[] { "does not belong", "column missing" };
         private readonly Random Rndize;
 
+        private static List<TimeZoneSelection> _timeZoneList = new List<TimeZoneSelection>();
         private static JSONData _jSON;
         private static DataTable _DataTable = new DataTable();
         private SLog Log = new SLog();
@@ -39,6 +45,7 @@ namespace SwitchWinClock
         private int _DeviceNumber = 1;
         private bool _AlwaysOnTop = false;
         private DateTime _ImAlive = DateTime.UtcNow;
+        private string _TimeZone = "";
 
         public SCConfig() 
         {
@@ -232,6 +239,41 @@ namespace SwitchWinClock
                 }
             }
         }
+        public static List<TimeZoneSelection> GetTimeZones()
+        {
+            if (_timeZoneList.Count == 0)
+            {
+                foreach (TimeZoneInfo z in TimeZoneInfo.GetSystemTimeZones())
+                    _timeZoneList.Add(new TimeZoneSelection(z.Id));
+
+                _timeZoneList.OrderByDescending(s =>s.UTCDiff);
+            }
+            return _timeZoneList;
+        }
+        public string TimeZone
+        {
+            get { return _TimeZone; }
+            set
+            {
+                _TimeZone = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.TimeZone] = {_TimeZone}");
+                Update();
+            }
+        }
+        public DateTime InstanceTime
+        {
+            get 
+            {
+                DateTime dt = DateTime.Now;
+                if (TimeZone != Global.CurrentTimeZone().Id)
+                {
+                    TimeZoneSelection tzFound = GetTimeZones().Find(f => f.Id == TimeZone) ?? Global.CurrentTimeZone();
+                    dt = DateTime.UtcNow.Add(tzFound.UTCDiff);
+                }
+
+                return dt;
+            }
+        }
         private void LoadData()
         {
             if(!ValidColums())
@@ -255,6 +297,7 @@ namespace SwitchWinClock
                 _DeviceNumber = _jSON.GetColumn<int>(dRow, ColNames.DeviceNumber, _DeviceNumber);
                 _AlwaysOnTop = _jSON.GetColumn<bool>(dRow, ColNames.AlwaysOnTop, _AlwaysOnTop);
                 _ImAlive = _jSON.GetColumn<DateTime>(dRow, ColNames.ImAlive, _ImAlive);
+                _TimeZone = _jSON.GetColumn<string>(dRow, ColNames.TimeZone, _TimeZone);
             }
 
             /*
@@ -324,6 +367,7 @@ namespace SwitchWinClock
             dRow[ColNames.DeviceNumber] = _DeviceNumber;
             dRow[ColNames.AlwaysOnTop] = _AlwaysOnTop;
             dRow[ColNames.ImAlive] = _ImAlive;
+            dRow[ColNames.TimeZone] = _TimeZone;
 
             if (_DataTable.Rows.Count == 0)
                 _DataTable.Rows.Add(dRow);  //add record to table.
@@ -368,6 +412,9 @@ namespace SwitchWinClock
                 _DataTable.Columns.Add(new DataColumn(ColNames.AlwaysOnTop, typeof(bool)));
             if (!_DataTable.Columns.Contains(ColNames.ImAlive))
                 _DataTable.Columns.Add(new DataColumn(ColNames.ImAlive, typeof(DateTime)));
+            if (!_DataTable.Columns.Contains(ColNames.TimeZone))
+                _DataTable.Columns.Add(new DataColumn(ColNames.TimeZone, typeof(string)));
+            
             Log.WriteLine(SMsgType.Information, $"Created table: {SETTINGS_TABLE} for ({Global.AppID})...");
         }
         private bool ValidColums()

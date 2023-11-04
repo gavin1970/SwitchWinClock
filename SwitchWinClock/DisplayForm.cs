@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using SwitchWinClock.utils;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace SwitchWinClock
 {
@@ -29,18 +30,37 @@ namespace SwitchWinClock
         private readonly Screen[] m_allScreens = Screen.AllScreens;
         private static SLog Log = null;
 
+        /// <summary>
+        /// allow diff in location. Reason being, all fonts are not blocked in size.
+        /// e.g 72px, Regular, "Berlin Sans FB" using "hh:mm:ss tt" can jump as much as 29px at times.
+        /// If set to center or right of screen and the fonts aren't blocked, this causes the time to jump every second.
+        /// TODO: Future make this more dynamic based on single character Font Max size when set and to set Form width.
+        /// </summary>
+        private static int FontAllowDiff { get; set; } = 30;
+        /// <summary>
+        /// TODO: Future make this more dynamic based on single character Font Max size when set and to set Form width.
+        /// </summary>
+        private static int FormAllowDiff { get; set; } = 60;
+
         private FontObject m_fontObject;
         private int m_waitTimer = 60000;  //default: 1 min
 
         public DisplayForm()
         {
             InitializeComponent();
+            //preload for cache
+            SCConfig.GetTimeZones();
+            //SetInstanceName(false);
+            //setup logging
             Log = new SLog(SMsgType.Debug);
-
+            //if this is a new instance, ask for a name and timezone.
             if (config.InstanceName.Equals(Global.DefaultInstanceName))
             {
                 if (!SetInstanceName(true))
+                {
+                    this.Close();
                     return;
+                }
             }
 
             this.SetupMenuChecks();
@@ -51,26 +71,39 @@ namespace SwitchWinClock
         }
         private bool SetInstanceName(bool isNew)
         {
+            TimeZoneSelection tzFound = SCConfig.GetTimeZones().Find(f => f.Id == config.TimeZone) ?? Global.CurrentTimeZone();
+            File.AppendAllText($"..\\{DateTime.UtcNow:MMddyyyy}_TimeZone.txt", $"{tzFound.LocalName}\n{tzFound.DisplayName}\n{tzFound.Id}\n{tzFound.UTCDiff}\n");
+
             using (InstanceNameForm frm = new InstanceNameForm())
             {
-                if(!config.InstanceName.Equals(Global.DefaultInstanceName))
+                MessageBox.Show("1");
+                //if not default, meaning this is a rename
+                if (!config.InstanceName.Equals(Global.DefaultInstanceName))
+                {
+                    MessageBox.Show($"2 - {tzFound.LocalName}");
                     frm.InstanceName = config.InstanceName;
+                    frm.TimeZone = tzFound.LocalName;
+                }
+                else
+                    MessageBox.Show($"2a - {config?.InstanceName}");
 
+                //load instance name and timezone.
                 DialogResult dr = frm.ShowDialog(this);
-                if (dr == DialogResult.Cancel || frm.InstanceName.Equals(string.Empty))
+                if (dr == DialogResult.Cancel)
                 {
                     if (isNew)
                     {
+                        //we have some possible cleanup, 
                         if (File.Exists(Global.ConfigFileName))
                             File.Delete(Global.ConfigFileName);
-                        
-                        this.Close();
-                        return false;
                     }
+                        
+                    return false;
                 }
-                else
+                else if (dr == DialogResult.OK)
                 {
                     config.InstanceName = frm.InstanceName;
+                    config.TimeZone = frm.TimeZone;
                 }
             }
 
@@ -172,6 +205,7 @@ namespace SwitchWinClock
             }
             else
             {
+                int lToBe, lDiff;
                 var thisScreen = m_allScreens[m_allScreens.Length >= config.DeviceNumber ? config.DeviceNumber : 0].Bounds;
 
                 switch (config.WinAlignment)
@@ -181,11 +215,21 @@ namespace SwitchWinClock
                         this.Top = thisScreen.Top;
                         break;
                     case ContentAlignment.TopCenter:
-                        this.Left = ((thisScreen.Left + thisScreen.Width) - (thisScreen.Width / 2)) - (this.Width / 2);
+                        lToBe = ((thisScreen.Left + thisScreen.Width) - (thisScreen.Width / 2)) - (this.Width / 2);
+                        lDiff = this.Left > lToBe ? this.Left - lToBe : lToBe - this.Left;
+
+                        if (lDiff > FontAllowDiff)
+                            this.Left = lToBe;
+
                         this.Top = thisScreen.Top;
                         break;
                     case ContentAlignment.TopRight:
-                        this.Left = (thisScreen.Left + thisScreen.Width) - (this.Width);
+                        lToBe = (thisScreen.Left + thisScreen.Width) - (this.Width);
+                        lDiff = this.Left > lToBe ? this.Left - lToBe : lToBe - this.Left;
+
+                        if (lDiff > FontAllowDiff)
+                            this.Left = lToBe;
+
                         this.Top = thisScreen.Top;
                         break;
                     case ContentAlignment.MiddleLeft:
@@ -193,11 +237,21 @@ namespace SwitchWinClock
                         this.Top = ((thisScreen.Top + thisScreen.Height) - (thisScreen.Height / 2)) - (this.Height / 2);
                         break;
                     case ContentAlignment.MiddleCenter:
-                        this.Left = ((thisScreen.Left + thisScreen.Width) - (thisScreen.Width / 2)) - (this.Width / 2);
+                        lToBe = ((thisScreen.Left + thisScreen.Width) - (thisScreen.Width / 2)) - (this.Width / 2);
+                        lDiff = this.Left > lToBe ? this.Left - lToBe : lToBe - this.Left;
+
+                        if (lDiff > FontAllowDiff)
+                            this.Left = lToBe;
+
                         this.Top = ((thisScreen.Top + thisScreen.Height) - (thisScreen.Height / 2)) - (this.Height / 2);
                         break;
                     case ContentAlignment.MiddleRight:
-                        this.Left = (thisScreen.Left + thisScreen.Width) - (this.Width);
+                        lToBe = (thisScreen.Left + thisScreen.Width) - (this.Width);
+                        lDiff = this.Left > lToBe ? this.Left - lToBe : lToBe - this.Left;
+
+                        if (lDiff > FontAllowDiff)
+                            this.Left = lToBe;
+
                         this.Top = ((thisScreen.Top + thisScreen.Height) - (thisScreen.Height / 2)) - (this.Height / 2);
                         break;
                     case ContentAlignment.BottomLeft:
@@ -205,18 +259,34 @@ namespace SwitchWinClock
                         this.Top = (thisScreen.Top+ thisScreen.Height) - (this.Height);
                         break;
                     case ContentAlignment.BottomCenter:
-                        this.Left = ((thisScreen.Left + thisScreen.Width) - (thisScreen.Width / 2)) - (this.Width / 2);
+                        lToBe = ((thisScreen.Left + thisScreen.Width) - (thisScreen.Width / 2)) - (this.Width / 2);
+                        lDiff = this.Left > lToBe ? this.Left - lToBe : lToBe - this.Left;
+
+                        if (lDiff > FontAllowDiff)
+                            this.Left = lToBe;
+
                         this.Top = (thisScreen.Top + thisScreen.Height) - (this.Height);
                         break;
                     case ContentAlignment.BottomRight:
-                        this.Left = (thisScreen.Left + thisScreen.Width) - (this.Width);
+                        lToBe = (thisScreen.Left + thisScreen.Width) - (this.Width);
+                        lDiff = this.Left > lToBe ? this.Left - lToBe : lToBe - this.Left;
+
+                        if (lDiff > FontAllowDiff)
+                            this.Left = lToBe;
+
                         this.Top = (thisScreen.Top + thisScreen.Height) - (this.Height);
                         break;
                 }
             }
         }
+        /// <summary>
+        /// Thread safe refresh
+        /// </summary>
         private void RefreshForm()
         {
+            if (m_closingForm)
+                return;
+
             if (InvokeRequired)
             {
                 var d = new VoidDelegate(RefreshForm);
@@ -232,9 +302,6 @@ namespace SwitchWinClock
             }
             else if (!Disposing && !IsDisposed)
             {
-                if (m_closingForm)
-                    return;
-
                 if(!this.Drag)
                     this.SetFormLocation();
 
@@ -249,7 +316,7 @@ namespace SwitchWinClock
 
             SetWaitTimer();
 
-            while (iEvent != EventTypes.EVENT_SHUTDOWN && !m_closingForm)
+            while (iEvent != EventTypes.EVENT_SHUTDOWN)
             {
                 RefreshForm();
                 iEvent = WaitHandle.WaitAny(SWCEvents, m_waitTimer);
@@ -286,10 +353,17 @@ namespace SwitchWinClock
         }
         private void SetupMenuChecks()
         {
-            if (config.ClockStyle == Clock_Style.Depth)
-                this.StyleDeptMenuItem_Click(null, null);
+            if (config.ClockStyle == Clock_Style.Depth_Shadowed)
+            {
+                this.StyleDeptMenuItem.Checked = true;
+                this.StyleShadowMenuItem.Checked = true;
+            }
+            else if (config.ClockStyle == Clock_Style.Depth)
+                this.StyleDeptMenuItem.Checked = true;
+            else if (config.ClockStyle == Clock_Style.Shadowed)
+                this.StyleShadowMenuItem.Checked = true;
             else
-                this.StyleBorderMenuItem_Click(null, null);
+                this.StyleBorderMenuItem.Checked = true;
 
             this.BackColorTransparentMenuItem.Checked = config.BackColor.A == 0;
             this.BorderColorTransparentMenuItem.Checked = config.FormBorderColor.A == 0;
@@ -404,7 +478,7 @@ namespace SwitchWinClock
             int depth = config.TextBorderDepth;
             int dblPad = (depth * 2);
 
-            string dt = DateTime.Now.ToString(config.DateFormat);
+            string dt = config.InstanceTime.ToString(config.DateFormat);
             Font ft = config.Font;
             switch (ft.Unit)
             {
@@ -438,16 +512,31 @@ namespace SwitchWinClock
             if (sugWidth > newHeight)
                 newWidth = sugWidth;
 
-            if (newHeight != sz.Height || newWidth != sz.Width)
+            //in attempt to not allow the form jump around because of size of font characters, this gives a little allowances.
+            int wDiff = newWidth > this.ClientSize.Width ? newWidth - this.ClientSize.Width : this.ClientSize.Width - newWidth;
+            if (newHeight != this.ClientSize.Height || newWidth > this.ClientSize.Width || wDiff > FormAllowDiff)
             {
                 this.ClientSize = new Size(newWidth, newHeight);
                 sz = new Size(this.ClientSize.Width - dblPad, this.ClientSize.Height - dblPad);
             }
 
             StringFormat sFormat = GetTextAlignment();
+            //if(config.FormBorderColor.R > config.FormBorderColor.G)
+            //{
 
-            int bColor = 125;
-            int tColor = bColor < 128 ? bColor + 128 : 128 - bColor;
+            //}
+            //else if(config.FormBorderColor.R < config.FormBorderColor.G || config.FormBorderColor.R.Equals(config.FormBorderColor.G))
+            //{
+            //    config.FormBorderColor.B
+            //}
+
+            int advColor = (config.ForeColor.R + config.ForeColor.G + config.ForeColor.B) / 3;
+            //int tColor = bColor < 128 ? bColor + 128 : 128 - bColor;
+            
+            int tColor = advColor < 128 ? advColor + 128 : advColor - 128;
+            int bColor = tColor > 128 ? tColor - 128 : tColor;
+            tColor = tColor > 128 ? tColor : 255 - tColor;
+
 
             //float scale = Math.Min((sz.Width / textSize.Width), sz.Height / textSize.Height);
             //e.Graphics.ScaleTransform(scale, scale);
@@ -467,11 +556,21 @@ namespace SwitchWinClock
             {
                 for (int i = 1; i <= depth; i++)
                 {
-                    g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(depth + i, depth, sz.Width, sz.Height), sFormat);
-                    g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(depth, depth + i, sz.Width, sz.Height), sFormat);
-                    g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(depth - i, depth, sz.Width, sz.Height), sFormat);
-                    g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(depth, depth - i, sz.Width, sz.Height), sFormat);
+                    if (config.ClockStyle == Clock_Style.Depth)
+                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(depth - i, depth - i, sz.Width, sz.Height), sFormat);
+                    else if (config.ClockStyle == Clock_Style.Shadowed)
+                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(depth + i, depth + i, sz.Width, sz.Height), sFormat);
+                    else
+                    {
+                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(depth + i, depth + i, sz.Width, sz.Height), sFormat);
+                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(depth - i, depth - i, sz.Width, sz.Height), sFormat);
+                    }
                 }
+
+                //for (int i = 1; i <= depth; i++)
+                //{
+                //    g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(depth - i, depth - i, sz.Width, sz.Height), sFormat);
+                //}
 
                 g.DrawString(dt, ft, new SolidBrush(fColor), new Rectangle(depth, depth, sz.Width, sz.Height), sFormat);
             }
@@ -559,8 +658,8 @@ namespace SwitchWinClock
         }
         private void Form_Closing(object sender, FormClosingEventArgs e)
         {
-            Log.WriteLine("Application Closing down.");
             m_closingForm = true;
+            Log.WriteLine("Application Closing down.");
             SWCEvents?[EventTypes.EVENT_SHUTDOWN].Set();
         }
         private void ExitMenuItem_Click(object sender, EventArgs e)
@@ -717,21 +816,49 @@ namespace SwitchWinClock
         }
         private void StyleDeptMenuItem_Click(object sender, EventArgs e)
         {
-            this.TextDepthpMenuItem.Text = "&Text Depth";
-            config.ClockStyle = Clock_Style.Depth;
-            StyleBorderMenuItem.Checked = false;
-            if (!StyleDeptMenuItem.Checked)
-                StyleDeptMenuItem.Checked = true;
-            TextBorderColorMenuItem.Visible = false;
+            if (StyleDeptMenuItem.Checked || this.StyleShadowMenuItem.Checked)
+            {
+                this.TextDepthpMenuItem.Text = "&Text Depth";
+                if (this.StyleShadowMenuItem.Checked && StyleDeptMenuItem.Checked)
+                    config.ClockStyle = Clock_Style.Depth_Shadowed;
+                else if (this.StyleDeptMenuItem.Checked)
+                    config.ClockStyle = Clock_Style.Depth;
+                else
+                    config.ClockStyle = Clock_Style.Shadowed;
+
+                this.StyleBorderMenuItem.Checked = false;
+                this.FontBorderColorMenuItem.Visible = false;
+            }
+            else
+                this.StyleDeptMenuItem.Checked = true;      //reject unchecking, since nothing is checked.
+        }
+        private void StyleShadowMenuItem_Click(object sender, EventArgs e)
+        {
+            if (StyleDeptMenuItem.Checked || this.StyleShadowMenuItem.Checked)
+            {
+                this.TextDepthpMenuItem.Text = "&Text Depth";
+                if (this.StyleShadowMenuItem.Checked && StyleDeptMenuItem.Checked)
+                    config.ClockStyle = Clock_Style.Depth_Shadowed;
+                else if (this.StyleShadowMenuItem.Checked)
+                    config.ClockStyle = Clock_Style.Shadowed;
+                else
+                    config.ClockStyle = Clock_Style.Depth;
+
+                this.StyleBorderMenuItem.Checked = false;
+                this.FontBorderColorMenuItem.Visible = false;
+            }
+            else
+                this.StyleShadowMenuItem.Checked = true;   //reject unchecking, since nothing is checked.
         }
         private void StyleBorderMenuItem_Click(object sender, EventArgs e)
         {
             this.TextDepthpMenuItem.Text = "&Text Border";
             config.ClockStyle = Clock_Style.Border;
             StyleDeptMenuItem.Checked = false;
-            if(!StyleBorderMenuItem.Checked)
+            StyleShadowMenuItem.Checked = false;
+            if (!StyleBorderMenuItem.Checked)
                 StyleBorderMenuItem.Checked = true;
-            TextBorderColorMenuItem.Visible = true;
+            FontBorderColorMenuItem.Visible = true;
         }
         private void TextBorderSetColorMenuItem_Click(object sender, EventArgs e)
         {
