@@ -496,7 +496,7 @@ namespace SwitchWinClock
             SizeF textSize = e.Graphics.MeasureString(dt, ft);
             Size sz = new Size(this.ClientSize.Width - dblPad, this.ClientSize.Height - dblPad);
 
-            int newHeight = (sz.Height + dblPad);
+            int newHeight = ((int)textSize.Height + dblPad);
             int newWidth = (sz.Width + dblPad);
 
             int sugWidth = (int)Math.Round(textSize.Width) + addSize + dblPad;
@@ -510,21 +510,14 @@ namespace SwitchWinClock
 
             //in attempt to not allow the form jump around because of size of font characters, this gives a little allowances.
             int wDiff = newWidth > this.ClientSize.Width ? newWidth - this.ClientSize.Width : this.ClientSize.Width - newWidth;
-            if (newHeight != this.ClientSize.Height || newWidth > this.ClientSize.Width || wDiff > FormAllowDiff)
+            int hDiff = newHeight > this.ClientSize.Height ? newHeight - this.ClientSize.Height : this.ClientSize.Height - Height;
+            if (wDiff > FormAllowDiff || hDiff > FormAllowDiff)
             {
                 this.ClientSize = new Size(newWidth, newHeight);
                 sz = new Size(this.ClientSize.Width - dblPad, this.ClientSize.Height - dblPad);
             }
 
-            StringFormat sFormat = GetTextAlignment();
-            //if(config.FormBorderColor.R > config.FormBorderColor.G)
-            //{
-
-            //}
-            //else if(config.FormBorderColor.R < config.FormBorderColor.G || config.FormBorderColor.R.Equals(config.FormBorderColor.G))
-            //{
-            //    config.FormBorderColor.B
-            //}
+            StringFormat sFormat = GetTextAlignment();            
 
             int advColor = (config.ForeColor.R + config.ForeColor.G + config.ForeColor.B) / 3;
             //int tColor = bColor < 128 ? bColor + 128 : 128 - bColor;
@@ -558,8 +551,8 @@ namespace SwitchWinClock
                         g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(depth + i, depth + i, sz.Width, sz.Height), sFormat);
                     else
                     {
-                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(depth + i, depth + i, sz.Width, sz.Height), sFormat);
-                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(depth - i, depth - i, sz.Width, sz.Height), sFormat);
+                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
+                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
                     }
                 }
 
@@ -568,7 +561,7 @@ namespace SwitchWinClock
                 //    g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(depth - i, depth - i, sz.Width, sz.Height), sFormat);
                 //}
 
-                g.DrawString(dt, ft, new SolidBrush(fColor), new Rectangle(depth, depth, sz.Width, sz.Height), sFormat);
+                g.DrawString(dt, ft, new SolidBrush(fColor), new Rectangle(0, 0, sz.Width, sz.Height), sFormat);
             }
         }
         private void CanvasPaint(PaintEventArgs e)
