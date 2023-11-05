@@ -9,6 +9,12 @@ namespace SwitchWinClock.utils
         public const int EVENT_TIMEOUT = 258;
     }
 
+    internal class MenuText
+    {
+        public const string TextBorderText = "&Text Border Size";
+        public const string TextDepthText = "&Text Depth";
+    }
+
     internal class ColNames
     {
         public const string InstanceName = "InstanceName";

@@ -40,9 +40,8 @@ namespace SwitchWinClock
         /// <summary>
         /// TODO: Future make this more dynamic based on single character Font Max size when set and to set Form width.
         /// </summary>
-        private static int FormAllowDiff { get; set; } = 60;
+        private static int FormAllowDiff { get; set; } = 20;
 
-        private FontObject m_fontObject;
         private int m_waitTimer = 60000;  //default: 1 min
 
         public DisplayForm()
@@ -361,6 +360,8 @@ namespace SwitchWinClock
             else
                 this.StyleBorderMenuItem.Checked = true;
 
+            this.TextDepthpMenuItem.Text = this.StyleBorderMenuItem.Checked ? MenuText.TextBorderText : MenuText.TextDepthText;
+            this.FontBorderColorMenuItem.Visible = this.StyleBorderMenuItem.Checked;
             this.BackColorTransparentMenuItem.Checked = config.BackColor.A == 0;
             this.BorderColorTransparentMenuItem.Checked = config.FormBorderColor.A == 0;
             this.ForeColorTransparentMenuItem.Checked = config.ForeColor.A == 0;
@@ -467,6 +468,14 @@ namespace SwitchWinClock
         }
         private void Form_Paint(object sender, PaintEventArgs e)
         {
+            //e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;   //commented, or it shows the pink form background around the border.
+            // When text is rendered directly
+            e.Graphics.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            // The composition properties are useful when drawing on a composited surface
+            // It has no effect when drawing on a Control's plain surface
+            e.Graphics.CompositingMode = CompositingMode.SourceOver;
+            e.Graphics.CompositingQuality = CompositingQuality.HighQuality;
+
             Graphics g = e.Graphics;
             int addSize;
 
@@ -496,7 +505,7 @@ namespace SwitchWinClock
             SizeF textSize = e.Graphics.MeasureString(dt, ft);
             Size sz = new Size(this.ClientSize.Width - dblPad, this.ClientSize.Height - dblPad);
 
-            int newHeight = ((int)textSize.Height + dblPad);
+            int newHeight = ((int)textSize.Height);
             int newWidth = (sz.Width + dblPad);
 
             int sugWidth = (int)Math.Round(textSize.Width) + addSize + dblPad;
@@ -509,62 +518,76 @@ namespace SwitchWinClock
                 newWidth = sugWidth;
 
             //in attempt to not allow the form jump around because of size of font characters, this gives a little allowances.
-            int wDiff = newWidth > this.ClientSize.Width ? newWidth - this.ClientSize.Width : this.ClientSize.Width - newWidth;
-            int hDiff = newHeight > this.ClientSize.Height ? newHeight - this.ClientSize.Height : this.ClientSize.Height - Height;
-            if (wDiff > FormAllowDiff || hDiff > FormAllowDiff)
+            //int wDiff = newWidth > this.ClientSize.Width ? newWidth - this.ClientSize.Width : this.ClientSize.Width - newWidth;
+            //int hDiff = newHeight > this.ClientSize.Height ? newHeight - this.ClientSize.Height : this.ClientSize.Height - Height;
+            //if (wDiff > FormAllowDiff || hDiff > FormAllowDiff)
             {
                 this.ClientSize = new Size(newWidth, newHeight);
-                sz = new Size(this.ClientSize.Width - dblPad, this.ClientSize.Height - dblPad);
+                sz = new Size(this.ClientSize.Width, this.ClientSize.Height);
             }
 
-            StringFormat sFormat = GetTextAlignment();            
+            StringFormat sFormat = new StringFormat()
+            {
+                LineAlignment = StringAlignment.Center,
+                Alignment = StringAlignment.Center
+            }; //GetTextAlignment();
 
-            int advColor = (config.ForeColor.R + config.ForeColor.G + config.ForeColor.B) / 3;
-            //int tColor = bColor < 128 ? bColor + 128 : 128 - bColor;
-            
-            int tColor = advColor < 128 ? advColor + 128 : advColor - 128;
+            //int advColor = (config.ForeColor.R + config.ForeColor.G + config.ForeColor.B) / 3;
+            //int tColor = advColor < 128 ? advColor + 128 : advColor - 128;
+            int tColor = 230;   //TODO: working on how I want this dynamically set.
             int bColor = tColor > 128 ? tColor - 128 : tColor;
             tColor = tColor > 128 ? tColor : 255 - tColor;
-
-
-            //float scale = Math.Min((sz.Width / textSize.Width), sz.Height / textSize.Height);
-            //e.Graphics.ScaleTransform(scale, scale);
 
             DrawForm(g, this.ClientSize);
 
             if (config.ClockStyle == Clock_Style.Border)
             {
-                m_fontObject = new FontObject(dt, ft);
-                m_fontObject.Outlined = true;
-                m_fontObject.Outline = new Pen(config.TextBorderColor, depth);
-                m_fontObject.FillColor = config.ForeColor;
+                using (FontObject fontObject = new FontObject(dt, ft))
+                {
+                    fontObject.Outlined = true;
+                    fontObject.Outline = new Pen(config.TextBorderColor, depth);
+                    fontObject.FillColor = config.ForeColor;
 
-                CanvasPaint(e);
+                    CanvasPaint(e, fontObject);
+                };
             }
             else
             {
-                for (int i = 1; i <= depth; i++)
+                //########################################
+                //NOTE: The depth and shadow was in the same loop.  This caused paint issues with some fonts.  Splitting them up, resolved that issue.
+                //########################################
+                if (config.ClockStyle == Clock_Style.Shadowed || config.ClockStyle == Clock_Style.Depth_Shadowed)
                 {
-                    if (config.ClockStyle == Clock_Style.Depth)
-                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(depth - i, depth - i, sz.Width, sz.Height), sFormat);
-                    else if (config.ClockStyle == Clock_Style.Shadowed)
-                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(depth + i, depth + i, sz.Width, sz.Height), sFormat);
-                    else
-                    {
+                    for (int i = 1; i <= depth; i++)
                         g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
-                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
-                    }
                 }
 
+                if (config.ClockStyle == Clock_Style.Depth || config.ClockStyle == Clock_Style.Depth_Shadowed)
+                {
+                    for (int i = 1; i <= depth; i++)
+                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
+                }
+
+                //########################################
+                //NOTE: This will be removed once the above has been running for a while.
+                //########################################
                 //for (int i = 1; i <= depth; i++)
                 //{
-                //    g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(depth - i, depth - i, sz.Width, sz.Height), sFormat);
+                //    if (config.ClockStyle == Clock_Style.Depth)
+                //        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
+                //    else if (config.ClockStyle == Clock_Style.Shadowed)
+                //        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
+                //    else
+                //    {
+                //        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
+                //        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
+                //    }
                 //}
 
                 g.DrawString(dt, ft, new SolidBrush(fColor), new Rectangle(0, 0, sz.Width, sz.Height), sFormat);
             }
         }
-        private void CanvasPaint(PaintEventArgs e)
+        private void CanvasPaint(PaintEventArgs e, FontObject fontObject)
         {
             using (var path = new GraphicsPath())
             using (var format = new StringFormat())
@@ -574,24 +597,14 @@ namespace SwitchWinClock
 
                 //float f = e.Graphics.DpiY * fontObject.SizeInPixels / 72f;
                 //fontObject.SizeInEms
-                path.AddString(m_fontObject.Text, m_fontObject.FontFamily, (int)m_fontObject.FontStyle, m_fontObject.SizeInPoints, this.ClientRectangle, format);
+                path.AddString(fontObject.Text, fontObject.FontFamily, (int)fontObject.FontStyle, fontObject.SizeInPoints, this.ClientRectangle, format);
 
-                //e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;   //commented, or it shows the pink form background around the border.
-                // When text is rendered directly
-                e.Graphics.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-                // The composition properties are useful when drawing on a composited surface
-                // It has no effect when drawing on a Control's plain surface
-                e.Graphics.CompositingMode = CompositingMode.SourceOver;
-                e.Graphics.CompositingQuality = CompositingQuality.HighQuality;
+                if (fontObject.Outlined)
+                    e.Graphics.DrawPath(fontObject.Outline, path);
 
-                if (m_fontObject.Outlined)
-                    e.Graphics.DrawPath(m_fontObject.Outline, path);
-
-                using (var brush = new SolidBrush(m_fontObject.FillColor))
+                using (var brush = new SolidBrush(fontObject.FillColor))
                     e.Graphics.FillPath(brush, path);
             }
-
-            m_fontObject.Dispose();
         }
         private void Form_MouseMove(object sender, MouseEventArgs e)
         {
@@ -807,7 +820,7 @@ namespace SwitchWinClock
         {
             if (StyleDeptMenuItem.Checked || this.StyleShadowMenuItem.Checked)
             {
-                this.TextDepthpMenuItem.Text = "&Text Depth";
+                this.TextDepthpMenuItem.Text = MenuText.TextDepthText;
                 if (this.StyleShadowMenuItem.Checked && StyleDeptMenuItem.Checked)
                     config.ClockStyle = Clock_Style.Depth_Shadowed;
                 else if (this.StyleDeptMenuItem.Checked)
@@ -825,7 +838,7 @@ namespace SwitchWinClock
         {
             if (StyleDeptMenuItem.Checked || this.StyleShadowMenuItem.Checked)
             {
-                this.TextDepthpMenuItem.Text = "&Text Depth";
+                this.TextDepthpMenuItem.Text = MenuText.TextDepthText;
                 if (this.StyleShadowMenuItem.Checked && StyleDeptMenuItem.Checked)
                     config.ClockStyle = Clock_Style.Depth_Shadowed;
                 else if (this.StyleShadowMenuItem.Checked)
@@ -841,7 +854,7 @@ namespace SwitchWinClock
         }
         private void StyleBorderMenuItem_Click(object sender, EventArgs e)
         {
-            this.TextDepthpMenuItem.Text = "&Text Border";
+            this.TextDepthpMenuItem.Text = MenuText.TextBorderText;
             config.ClockStyle = Clock_Style.Border;
             StyleDeptMenuItem.Checked = false;
             StyleShadowMenuItem.Checked = false;
