@@ -97,6 +97,10 @@ namespace SwitchWinClock
         public string DateFormat 
         { 
             get {
+                //make sure "id" for displaying TimeZone ID is in lower case.
+                if (_DateFormat.IndexOf("{id}", StringComparison.OrdinalIgnoreCase)>-1)
+                    _DateFormat = _DateFormat.Replace("{ID}", "{id}");  
+
                 //any changes will be updated in Json during the ImAlive call.
                 if (_DateFormat.Contains("Z"))
                     //make sure all cap Z are lowercase.

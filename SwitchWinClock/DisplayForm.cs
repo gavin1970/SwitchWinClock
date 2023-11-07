@@ -371,27 +371,22 @@ namespace SwitchWinClock
         }
         private void SetDateFormatMenus(ToolStripMenuItem menuItem = null)
         {
+            string format;
+            //only null went submitted by custome text.
             if (menuItem == null)
             {
-                bool found = false;
-                string format = config.DateFormat;
-
+                format = config.DateFormat;
                 foreach (ToolStripMenuItem tsi in DateFormattingMenuItem.DropDownItems)
                 {
                     if (format == tsi.Text)
-                    {
                         tsi.Checked = true;
-                        found = true;                        
-                    }
                     else
                         tsi.Checked = false;
                 }
-
-                if(!found)
-                    CustomDateTextBox.Text = format;
             }
             else
             {
+                //uncheck all the others, checking only the one selected.
                 foreach (ToolStripMenuItem tsi in DateFormattingMenuItem.DropDownItems)
                 {
                     if (menuItem.Text == tsi.Text)
@@ -399,8 +394,14 @@ namespace SwitchWinClock
                     else
                         tsi.Checked = false;
                 }
-                config.DateFormat = menuItem.Text;
+
+                format = menuItem.Text;
+                config.DateFormat = format;
             }
+
+            //even though it's checked, we will add it to custom
+            //box also, just in case user wants to alter just a little.
+            CustomDateTextBox.Text = format;
 
             SetWaitTimer();
         }
@@ -516,7 +517,18 @@ namespace SwitchWinClock
                     dtFormat = dtFormat.Replace("z", $"{addminus}{tzOffSet:hh}");  //single h without mm fails
 
             }
+            //if the user is using the {id} variable, and because timezones have characters that will set
+            //time, this is a shortcut until after Date Formatting.
+            if (dtFormat.Contains(@"{id}"))
+                dtFormat = dtFormat.Replace("{id}", @"{i\d}");
+
+            //forate the date based on users requirement
             string dt = config.InstanceTime.ToString(dtFormat);
+
+            //now lets check and if exists still, lets replace it with the timezoneID
+            if (dt.Contains(@"{id}"))
+                dt = dt.Replace(@"{id}", config.InstanceTimeZone.Id);
+
             SizeF textSize = e.Graphics.MeasureString(dt, ft);
             Size sz = new Size(this.ClientSize.Width - dblPad, this.ClientSize.Height - dblPad);
 
@@ -821,6 +833,7 @@ namespace SwitchWinClock
             ToolStripMenuItem menuItem = ((ToolStripMenuItem)sender);
             menuItem.Checked = !menuItem.Checked;
             SetDateFormatMenus(menuItem);
+
             RefreshForm();
         }
         private void ForeColorSetMenuItem_Click(object sender, EventArgs e)
