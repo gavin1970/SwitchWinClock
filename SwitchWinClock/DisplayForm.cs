@@ -332,7 +332,7 @@ namespace SwitchWinClock
                 m_waitTimer = 1;
             else if (config.DateFormat?.IndexOf("ff") > -1)
                 m_waitTimer = 10;
-            else if (config.DateFormat?.IndexOf("f") > -1)
+            else if (config.DateFormat?.IndexOf("f") > -1 || config.DateFormat?.IndexOf("s") > -1)  //milliseconds or seconds
                 m_waitTimer = 100;
             else
                 m_waitTimer = 1000;
