@@ -7,7 +7,7 @@ namespace SwitchWinClock.utils
     internal class Global
     {
         public const string DefaultInstanceName = "Unknown";
-        public const int MaxImAliveSeconds = 5;
+        public const int MaxImAliveSeconds = 10;
         public static bool ShowedTimeZone = false;
 
         public static string ConfigFileName { get { return $"SWClock{AppID:00}.config"; } }
