@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SwitchTimeZones;
+using System;
 using System.Diagnostics;
 
 namespace SwitchWinClock.utils
@@ -31,46 +32,10 @@ namespace SwitchWinClock.utils
 
             return utcName.Trim();
         }
-        public static TimeZoneSelection CurrentTimeZone()
+        public static TrueTimeZone CurrentTimeZone()
         {
-            DateTimeOffset locDiff = DateTimeOffset.Now;
-            DateTime utcD = DateTime.UtcNow;
-            DateTime locD = DateTime.Now;
-
             TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneInfo.Local.Id);
-            TimeZoneInfo tzi2 = TimeZoneInfo.FindSystemTimeZoneById("Azores Standard Time");
-            
-            //this whole if statement is attempting to find a work around for TimeZoneInfo not
-            //returning the write timezone.  Current I'm -4 CST, but for some reason
-            //it's returning -5 CST.  After some research, this is a know issue for some time.
-            if (!ShowedTimeZone)
-            {
-                string tmp = DateTime.Now.ToString("zzz");
-                DateTime newDt = DateTime.UtcNow.Add(tzi2.BaseUtcOffset);
-                
-                ShowedTimeZone = true;
-
-                bool isDST = TimeZoneInfo.Local.BaseUtcOffset != locDiff.Offset;    //true
-                bool isDST1 = TimeZoneInfo.Local.IsDaylightSavingTime(locD);        //true
-                bool isDST2 = TimeZoneInfo.Local.IsDaylightSavingTime(utcD);        //true
-                bool isDST3 = TimeZoneInfo.Utc.IsDaylightSavingTime(utcD);          //false
-                bool isDST4 = TimeZoneInfo.Utc.IsDaylightSavingTime(locD);          //false
-
-                if(!tmp.Equals("-04:00"))
-                    Console.WriteLine($"11/4 Now = Was: -04:00,  Now: {tmp}");
-                if (!isDST)
-                    Console.WriteLine($"11/4 isDST = Was: true,  Now: {isDST}");
-                if (!isDST1)
-                    Console.WriteLine($"11/4 isDST1 = Was: true,  Now: {isDST1}");
-                if (!isDST2)
-                    Console.WriteLine($"11/4 isDST2 = Was: true,  Now: {isDST2}");
-                if (isDST3)
-                    Console.WriteLine($"11/4 isDST3 = Was: false,  Now: {isDST3}");
-                if (isDST4)
-                    Console.WriteLine($"11/4 isDST4 = Was: false,  Now: {isDST4}");
-            }
-
-            return SCConfig.GetTimeZones().Find(f => f.DisplayName == tzi.DisplayName);
+            return SCConfig.GetTimeZones().Find(f => f.Id == tzi.Id);
         }
     }
 }

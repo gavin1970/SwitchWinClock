@@ -81,7 +81,9 @@
     </Compile>
     <Compile Include="models\ResultStatus.cs" />
     <Compile Include="models\SLFV.cs" />
+    <Compile Include="SwitchTimeZones\services\TimeZoneSearch.cs" />
     <Compile Include="models\TimeZoneSelection.cs" />
+    <Compile Include="SwitchTimeZones\models\TrueTimeZone.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="services\SCConfig.cs" />
@@ -92,6 +94,7 @@
     <Compile Include="utils\FontObject.cs" />
     <Compile Include="utils\Global.cs" />
     <Compile Include="utils\SLog.cs" />
+    <Compile Include="SwitchTimeZones\constants\WorldTimeZones.cs" />
     <EmbeddedResource Include="DisplayForm.resx">
       <DependentUpon>DisplayForm.cs</DependentUpon>
       <SubType>Designer</SubType>

@@ -1,4 +1,5 @@
-﻿using SwitchWinClock.utils;
+﻿using SwitchTimeZones;
+using SwitchWinClock.utils;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -13,8 +14,8 @@ namespace SwitchWinClock
         public InstanceNameForm()
         {
             InitializeComponent();
-            foreach(TimeZoneSelection zone in SCConfig.GetTimeZones())
-                this.TimeZoneComboBox.Items.Add(zone.LocalName);
+            foreach(TrueTimeZone zone in SCConfig.GetTimeZones())
+                this.TimeZoneComboBox.Items.Add(zone.DisplayName);
         }
 
         public string InstanceName { get; set; }
@@ -30,7 +31,7 @@ namespace SwitchWinClock
             DialogResult = DialogResult.OK;
             this.InstanceName = this.TxtInstanceName.Text.Trim();
 
-            TimeZoneSelection tzFound = SCConfig.GetTimeZones().Find(f => f.LocalName == this.TimeZoneComboBox.Text) ?? Global.CurrentTimeZone();
+            TrueTimeZone tzFound = TimeZoneSearch.SearchByName(this.TimeZoneComboBox.Text) ?? Global.CurrentTimeZone();
 
             this.TimeZone = tzFound.Id;
             this.Close();

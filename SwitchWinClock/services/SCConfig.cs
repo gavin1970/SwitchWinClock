@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using SwitchWinClock.models;
 using System.Linq;
+using SwitchTimeZones;
 
 namespace SwitchWinClock
 {
@@ -25,7 +26,9 @@ namespace SwitchWinClock
         private readonly string[] RefreshDataErrors = new string[] { "does not belong", "column missing" };
         private readonly Random Rndize;
 
-        private static List<TimeZoneSelection> _timeZoneList = new List<TimeZoneSelection>();
+        private int _refreshHour = -1;
+        private static TrueTimeZone _selectedTimeZone = null;
+        private static List<TrueTimeZone> _timeZoneList = new List<TrueTimeZone>();
         private static JSONData _jSON;
         private static DataTable _DataTable = new DataTable();
         private SLog Log = new SLog();
@@ -93,7 +96,20 @@ namespace SwitchWinClock
         }
         public string DateFormat 
         { 
-            get { return _DateFormat; }
+            get {
+                //any changes will be updated in Json during the ImAlive call.
+                if (_DateFormat.Contains("Z"))
+                    //make sure all cap Z are lowercase.
+                    _DateFormat = _DateFormat.Replace("Z", "z");
+
+                if (_DateFormat.Contains("z"))
+                {
+                    //timezones don't support seconds or any extra z's that might be added.
+                    while (_DateFormat.Contains("zzzzzz"))
+                        _DateFormat = _DateFormat.Replace("zzzzzz", "zzzz");
+                }
+                return _DateFormat; 
+            }
             set
             {
                 _DateFormat = value;
@@ -239,16 +255,9 @@ namespace SwitchWinClock
                 }
             }
         }
-        public static List<TimeZoneSelection> GetTimeZones()
+        public static List<TrueTimeZone> GetTimeZones()
         {
-            if (_timeZoneList.Count == 0)
-            {
-                foreach (TimeZoneInfo z in TimeZoneInfo.GetSystemTimeZones())
-                    _timeZoneList.Add(new TimeZoneSelection(z.Id));
-
-                _timeZoneList.OrderByDescending(s =>s.UTCDiff);
-            }
-            return _timeZoneList;
+            return WorldTimeZones.TimeZones;
         }
         public string TimeZone
         {
@@ -256,22 +265,45 @@ namespace SwitchWinClock
             set
             {
                 _TimeZone = value;
+                _selectedTimeZone = null;
                 Log.WriteLine(SMsgType.Information, $"[ColNames.TimeZone] = {_TimeZone}");
                 Update();
             }
         }
         public DateTime InstanceTime
         {
-            get 
+            get
             {
-                DateTime dt = DateTime.Now;
-                if (TimeZone != Global.CurrentTimeZone().Id)
+                //strickly for timezone refresh.  Every hour on the hour, timezone will be refreshed.
+                if (_selectedTimeZone == null || !DateTime.UtcNow.Hour.Equals(_refreshHour))
                 {
-                    TimeZoneSelection tzFound = GetTimeZones().Find(f => f.Id == TimeZone) ?? Global.CurrentTimeZone();
-                    dt = DateTime.UtcNow.Add(tzFound.UTCDiff);
+                    _refreshHour = DateTime.UtcNow.Hour;
+                    TrueTimeZone tzs = Global.CurrentTimeZone();
+                    if (TimeZone.Equals(tzs.Id))
+                        _selectedTimeZone = tzs;
+                    else
+                        _selectedTimeZone = GetTimeZones().Find(f => f.Id == TimeZone);
                 }
 
-                return dt;
+                return DateTime.UtcNow.Add(_selectedTimeZone.IsDaylightSavingTime ? _selectedTimeZone.DSTUtcOffset : _selectedTimeZone.BaseUtcOffset);
+            }
+        }
+        public TrueTimeZone InstanceTimeZone
+        {
+            get
+            {
+                //strickly for timezone refresh.  Every hour on the hour, timezone will be refreshed.
+                if (_selectedTimeZone == null)
+                {
+                    _refreshHour = DateTime.UtcNow.Hour;
+                    TrueTimeZone tzs = Global.CurrentTimeZone();
+                    if (TimeZone.Equals(tzs.Id))
+                        _selectedTimeZone = tzs;
+                    else
+                        _selectedTimeZone = GetTimeZones().Find(f => f.Id == TimeZone);
+                }
+
+                return _selectedTimeZone;
             }
         }
         private void LoadData()
@@ -310,26 +342,6 @@ namespace SwitchWinClock
             */
             if (_jSON.LastError != null)
                 throw new Exception(_jSON.LastError.Message);
-        }
-        private bool IsResetDataMessage()
-        {
-            bool retVal = false;
-            string msg;
-
-            if (_jSON.LastError == null)
-                return retVal;
-            else
-                msg = _jSON.LastError.Message;
-
-            foreach (string str in RefreshDataErrors)
-            {
-                if (msg.ToLower().Contains(str.ToLower()))
-                {
-                    retVal = true;
-                    break;
-                }
-            }
-            return retVal;
         }
         private void Update()
         {

@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using SwitchWinClock.utils;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
+using SwitchTimeZones;
 
 namespace SwitchWinClock
 {
@@ -70,8 +70,7 @@ namespace SwitchWinClock
         }
         private bool SetInstanceName(bool isNew)
         {
-            TimeZoneSelection tzFound = SCConfig.GetTimeZones().Find(f => f.Id == config.TimeZone) ?? Global.CurrentTimeZone();
-            File.AppendAllText($"..\\{DateTime.UtcNow:MMddyyyy}_TimeZone.txt", $"{tzFound.LocalName}\n{tzFound.DisplayName}\n{tzFound.Id}\n{tzFound.UTCDiff}\n");
+            TrueTimeZone tzFound = TimeZoneSearch.SearchById(config.TimeZone) ?? Global.CurrentTimeZone();
 
             using (InstanceNameForm frm = new InstanceNameForm())
             {
@@ -79,7 +78,7 @@ namespace SwitchWinClock
                 if (!config.InstanceName.Equals(Global.DefaultInstanceName))
                 {
                     frm.InstanceName = config.InstanceName;
-                    frm.TimeZone = tzFound.LocalName;
+                    frm.TimeZone = tzFound.DisplayName;
                 }
 
                 //load instance name and timezone.
@@ -483,7 +482,6 @@ namespace SwitchWinClock
             int depth = config.TextBorderDepth;
             int dblPad = (depth * 2);
 
-            string dt = config.InstanceTime.ToString(config.DateFormat);
             Font ft = config.Font;
             switch (ft.Unit)
             {
@@ -502,6 +500,23 @@ namespace SwitchWinClock
                     break;
             }
 
+            string dtFormat = config.DateFormat;
+            if (dtFormat.Contains("z"))
+            {
+                TimeSpan tzOffSet = config.InstanceTimeZone.IsDaylightSavingTime ? config.InstanceTimeZone.DSTUtcOffset : config.InstanceTimeZone.BaseUtcOffset;
+                string addminus = tzOffSet.Hours < 0 ? "-" : "+";
+
+                if (dtFormat.Contains("zzzz"))
+                    dtFormat = dtFormat.Replace("zzzz", $"{addminus}{tzOffSet:hh\\:mm}");
+                if (dtFormat.Contains("zzz"))
+                    dtFormat = dtFormat.Replace("zzz", $"{addminus}{tzOffSet:h\\:mm}");
+                if (dtFormat.Contains("zz"))
+                    dtFormat = dtFormat.Replace("zz", $"{addminus}{tzOffSet:hh}");
+                if (dtFormat.Contains("z"))
+                    dtFormat = dtFormat.Replace("z", $"{addminus}{tzOffSet:hh}");  //single h without mm fails
+
+            }
+            string dt = config.InstanceTime.ToString(dtFormat);
             SizeF textSize = e.Graphics.MeasureString(dt, ft);
             Size sz = new Size(this.ClientSize.Width - dblPad, this.ClientSize.Height - dblPad);
 
