@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Drawing;
 using System.Threading;
 using System.Diagnostics;
@@ -8,9 +10,7 @@ using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Text.RegularExpressions;
 using SwitchWinClock.utils;
-using System.IO;
-using System.Linq;
-using SwitchTimeZones;
+using TruTimeZones;
 
 namespace SwitchWinClock
 {
@@ -70,7 +70,7 @@ namespace SwitchWinClock
         }
         private bool SetInstanceName(bool isNew)
         {
-            TrueTimeZone tzFound = TimeZoneSearch.SearchById(config.TimeZone) ?? Global.CurrentTimeZone();
+            TruTimeZone tzFound = TimeZoneSearch.SearchById(config.TimeZone) ?? Global.CurrentTimeZone();
 
             using (InstanceNameForm frm = new InstanceNameForm())
             {

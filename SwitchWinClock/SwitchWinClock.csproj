@@ -65,6 +65,9 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="TruTimeZones">
+      <HintPath>..\..\ClassLibraries\TruTimeZones\TruTimeZones\bin\Release\net48\TruTimeZones.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DisplayForm.cs">
@@ -81,9 +84,7 @@
     </Compile>
     <Compile Include="models\ResultStatus.cs" />
     <Compile Include="models\SLFV.cs" />
-    <Compile Include="SwitchTimeZones\services\TimeZoneSearch.cs" />
     <Compile Include="models\TimeZoneSelection.cs" />
-    <Compile Include="SwitchTimeZones\models\TrueTimeZone.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="services\SCConfig.cs" />
@@ -94,7 +95,6 @@
     <Compile Include="utils\FontObject.cs" />
     <Compile Include="utils\Global.cs" />
     <Compile Include="utils\SLog.cs" />
-    <Compile Include="SwitchTimeZones\constants\WorldTimeZones.cs" />
     <EmbeddedResource Include="DisplayForm.resx">
       <DependentUpon>DisplayForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -138,6 +138,12 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="lib\debug\TruTimeZones.dll" />
+    <Content Include="lib\debug\TruTimeZones.ico" />
+    <Content Include="lib\debug\TruTimeZones.pdb" />
+    <Content Include="lib\release\TruTimeZones.dll" />
+    <Content Include="lib\release\TruTimeZones.ico" />
+    <Content Include="lib\release\TruTimeZones.pdb" />
     <Content Include="switch.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

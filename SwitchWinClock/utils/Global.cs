@@ -1,6 +1,7 @@
-﻿using SwitchTimeZones;
-using System;
+﻿using System;
 using System.Diagnostics;
+using System.Linq;
+using TruTimeZones;
 
 namespace SwitchWinClock.utils
 {
@@ -32,10 +33,10 @@ namespace SwitchWinClock.utils
 
             return utcName.Trim();
         }
-        public static TrueTimeZone CurrentTimeZone()
+        public static TruTimeZone CurrentTimeZone()
         {
             TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneInfo.Local.Id);
-            return SCConfig.GetTimeZones().Find(f => f.Id == tzi.Id);
+            return SCConfig.GetTimeZones().First(f => f.Id == tzi.Id);
         }
     }
 }

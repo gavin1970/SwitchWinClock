@@ -1,13 +1,12 @@
-﻿using SwitchWinClock.utils;
-using System;
+﻿using System;
 using System.Net;
 using System.Data;
 using System.Drawing;
 using System.Reflection;
 using System.Collections.Generic;
-using SwitchWinClock.models;
+using SwitchWinClock.utils;
 using System.Linq;
-using SwitchTimeZones;
+using TruTimeZones;
 
 namespace SwitchWinClock
 {
@@ -27,8 +26,8 @@ namespace SwitchWinClock
         private readonly Random Rndize;
 
         private int _refreshHour = -1;
-        private static TrueTimeZone _selectedTimeZone = null;
-        private static List<TrueTimeZone> _timeZoneList = new List<TrueTimeZone>();
+        private static TruTimeZone _selectedTimeZone = null;
+        private static List<TruTimeZone> _timeZoneList = new List<TruTimeZone>();
         private static JSONData _jSON;
         private static DataTable _DataTable = new DataTable();
         private SLog Log = new SLog();
@@ -259,9 +258,9 @@ namespace SwitchWinClock
                 }
             }
         }
-        public static List<TrueTimeZone> GetTimeZones()
+        public static IEnumerable<TruTimeZone> GetTimeZones()
         {
-            return WorldTimeZones.TimeZones;
+            return TimeZoneSearch.GetTimeZones();
         }
         public string TimeZone
         {
@@ -282,17 +281,17 @@ namespace SwitchWinClock
                 if (_selectedTimeZone == null || !DateTime.UtcNow.Hour.Equals(_refreshHour))
                 {
                     _refreshHour = DateTime.UtcNow.Hour;
-                    TrueTimeZone tzs = Global.CurrentTimeZone();
+                    TruTimeZone tzs = Global.CurrentTimeZone();
                     if (TimeZone.Equals(tzs.Id))
                         _selectedTimeZone = tzs;
                     else
-                        _selectedTimeZone = GetTimeZones().Find(f => f.Id == TimeZone);
+                        _selectedTimeZone = GetTimeZones().First(f => f.Id == TimeZone);
                 }
 
                 return DateTime.UtcNow.Add(_selectedTimeZone.IsDaylightSavingTime ? _selectedTimeZone.DSTUtcOffset : _selectedTimeZone.BaseUtcOffset);
             }
         }
-        public TrueTimeZone InstanceTimeZone
+        public TruTimeZone InstanceTimeZone
         {
             get
             {
@@ -300,11 +299,11 @@ namespace SwitchWinClock
                 if (_selectedTimeZone == null)
                 {
                     _refreshHour = DateTime.UtcNow.Hour;
-                    TrueTimeZone tzs = Global.CurrentTimeZone();
+                    TruTimeZone tzs = Global.CurrentTimeZone();
                     if (TimeZone.Equals(tzs.Id))
                         _selectedTimeZone = tzs;
                     else
-                        _selectedTimeZone = GetTimeZones().Find(f => f.Id == TimeZone);
+                        _selectedTimeZone = GetTimeZones().First(f => f.Id == TimeZone);
                 }
 
                 return _selectedTimeZone;
