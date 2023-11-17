@@ -28,6 +28,7 @@ namespace SwitchWinClock
         private readonly Font ButtonFont = new Font("Arial Black", 10F, FontStyle.Regular, GraphicsUnit.Pixel);
         private readonly SCConfig config = new SCConfig();
         private readonly Screen[] m_allScreens = Screen.AllScreens;
+        const string ExitAll = ".\\exitAll";
         private static SLog Log = null;
 
         /// <summary>
@@ -301,6 +302,12 @@ namespace SwitchWinClock
 
                 config.ImAlive();
 
+                if (File.Exists(ExitAll))
+                {
+                    this.Close();
+                    return;
+                }
+
                 this.Invalidate();
             }
         }
@@ -415,18 +422,19 @@ namespace SwitchWinClock
         private void RefreshInstancesMenu()
         {
             AvailableInstanceMenuItem.DropDownItems.Clear();
+            bool othersRunning = false;
 
             string appName = $"{About.AppTitle.Replace(" ", "")}{mutexExt}";
             for (int id = 1; id <= 10; id++)
             {
                 FileInfo fi = new FileInfo($"SWClock{id:00}.config");
-                if (!Global.AppID.Equals(id) && fi.Exists && fi.LastWriteTimeUtc<DateTime.UtcNow.AddSeconds(-Global.MaxImAliveSeconds))
+                if (!Global.AppID.Equals(id) && fi.Exists && fi.LastWriteTimeUtc < DateTime.UtcNow.AddSeconds(-Global.MaxImAliveSeconds))
                 {
                     var allLines = File.ReadAllLines(fi.FullName);
 
                     //pull InstanceName, if column is missing, get DateFormat only from others file.
-                    var formats = allLines.Where(w=>w.IndexOf($"{ColNames.InstanceName}\":") >-1).ToArray();
-                    if(formats.Length == 0)
+                    var formats = allLines.Where(w => w.IndexOf($"{ColNames.InstanceName}\":") > -1).ToArray();
+                    if (formats.Length == 0)
                         formats = allLines.Where(w => w.IndexOf($"{ColNames.DateFormat}\":") > -1).ToArray();
 
                     if (formats.Length > 0)
@@ -445,15 +453,28 @@ namespace SwitchWinClock
                         AvailableInstanceMenuItem.DropDownItems.Add(tsmi);
                     }
                 }
+                else if (fi.Exists && fi.LastWriteTimeUtc < DateTime.UtcNow.AddSeconds(-Global.MaxImAliveSeconds))
+                {
+                    //MessageBox.Show("otherRunning is being set.");
+                    othersRunning = true;
+                }
+                //else
+                //{
+                //    MessageBox.Show($"ID: {id},  Exists: {fi.Exists},  LastWrite: {fi.LastWriteTimeUtc} < {DateTime.UtcNow.AddSeconds(-Global.MaxImAliveSeconds)} = {(fi.LastWriteTimeUtc<DateTime.UtcNow.AddSeconds(-Global.MaxImAliveSeconds))}");
+                //}
             }
 
-            if (AvailableInstanceMenuItem.DropDownItems.Count == 0)
-                AvailableInstanceMenuItem.Visible = false;
-            else
-                AvailableInstanceMenuItem.Visible = true;
+            this.AvailableInstanceMenuItem.Visible = AvailableInstanceMenuItem.DropDownItems.Count != 0;
+
+            //MessageBox.Show($"otherRunning is '{othersRunning}'");
+            this.ExitAllMenuItem.Visible = othersRunning;
+            //MessageBox.Show($"ExitAllMenuItem.Visible is '{this.ExitAllMenuItem.Visible}'");
         }
         private void Form_Load(object sender, EventArgs e)
         {
+            if (File.Exists(ExitAll))
+                File.Delete(ExitAll);
+
             Log.WriteLine("Starting application form.");
             RefreshInstancesMenu();
             SWCEvents = new AutoResetEvent[]
@@ -502,6 +523,9 @@ namespace SwitchWinClock
             }
 
             string dtFormat = config.DateFormat;
+            if (dtFormat.Contains("\\z"))
+                dtFormat = dtFormat.Replace("\\z", "#{¿}#");
+
             if (dtFormat.Contains("z"))
             {
                 TimeSpan tzOffSet = config.InstanceTimeZone.IsDaylightSavingTime ? config.InstanceTimeZone.DSTUtcOffset : config.InstanceTimeZone.BaseUtcOffset;
@@ -517,6 +541,10 @@ namespace SwitchWinClock
                     dtFormat = dtFormat.Replace("z", $"{addminus}{tzOffSet:hh}");  //single h without mm fails
 
             }
+
+            if (dtFormat.Contains("#{¿}#"))
+                dtFormat = dtFormat.Replace("#{¿}#", "z");
+
             //if the user is using the {id} variable, and because timezones have characters that will set
             //time, this is a shortcut until after Date Formatting.
             if (dtFormat.Contains(@"{id}"))
@@ -681,6 +709,14 @@ namespace SwitchWinClock
             }
 
             if (this.Drag) {
+                this.Drag = false;  //shouldn't be set.
+                RefreshForm();
+            }
+        }
+        private void Form_LostFocus(object sender, EventArgs e)
+        {
+            if (this.Drag)
+            {
                 this.Drag = false;  //shouldn't be set.
                 RefreshForm();
             }
@@ -984,6 +1020,10 @@ namespace SwitchWinClock
         private void RenameInstanceMenuItem_Click(object sender, EventArgs e)
         {
             SetInstanceName(false);
+        }
+        private void ExitAllMenuItem_Click(object sender, EventArgs e)
+        {
+            File.WriteAllText(ExitAll, DateTime.Now.ToString("ddd, MM/dd/yyyy HH:mm.ss.ffff"));
         }
     }
 }

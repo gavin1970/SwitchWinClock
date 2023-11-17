@@ -151,6 +151,7 @@
             this.LblTitle.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Control_MouseDown);
             this.LblTitle.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Control_MouseMove);
             this.LblTitle.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Control_MouseUp);
+            this.LblTitle.LostFocus += new System.EventHandler(this.Control_LostFocus);
             // 
             // InstanceNameForm
             // 

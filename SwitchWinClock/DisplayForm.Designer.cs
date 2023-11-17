@@ -36,6 +36,7 @@ namespace SwitchWinClock
             this.SettingsContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ClockStyleMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StyleDeptMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.StyleShadowMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StyleBorderMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.StyleCounterMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -67,15 +68,15 @@ namespace SwitchWinClock
             this.ForeColorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ForeColorSetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ForeColorTransparentMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FontBorderColorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.TextBorderSetColorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.TextBorderTransparentMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.BackColorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.BackColorSetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.BackColorTransparentMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.BorderColorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.BorderColorSetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.BorderColorTransparentMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.FontBorderColorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.TextBorderSetColorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.TextBorderTransparentMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.TextDepthpMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
@@ -92,8 +93,8 @@ namespace SwitchWinClock
             this.RenameInstanceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DeleteInstanceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.ExitAllMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.StyleShadowMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SettingsContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -116,9 +117,10 @@ namespace SwitchWinClock
             this.RenameInstanceMenuItem,
             this.DeleteInstanceMenuItem,
             this.toolStripSeparator2,
+            this.ExitAllMenuItem,
             this.ExitMenuItem});
             this.SettingsContextMenu.Name = "SettingsContextMenu";
-            this.SettingsContextMenu.Size = new System.Drawing.Size(181, 336);
+            this.SettingsContextMenu.Size = new System.Drawing.Size(181, 358);
             this.SettingsContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.SettingsContextMenu_Opening);
             this.SettingsContextMenu.MouseLeave += new System.EventHandler(this.Menu_MouseLeave);
             // 
@@ -139,30 +141,39 @@ namespace SwitchWinClock
             this.StyleDeptMenuItem.CheckOnClick = true;
             this.StyleDeptMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.StyleDeptMenuItem.Name = "StyleDeptMenuItem";
-            this.StyleDeptMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.StyleDeptMenuItem.Size = new System.Drawing.Size(141, 22);
             this.StyleDeptMenuItem.Text = "&Depth";
             this.StyleDeptMenuItem.Click += new System.EventHandler(this.StyleDeptMenuItem_Click);
+            // 
+            // StyleShadowMenuItem
+            // 
+            this.StyleShadowMenuItem.CheckOnClick = true;
+            this.StyleShadowMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.StyleShadowMenuItem.Name = "StyleShadowMenuItem";
+            this.StyleShadowMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.StyleShadowMenuItem.Text = "&Shadowed";
+            this.StyleShadowMenuItem.Click += new System.EventHandler(this.StyleShadowMenuItem_Click);
             // 
             // StyleBorderMenuItem
             // 
             this.StyleBorderMenuItem.CheckOnClick = true;
             this.StyleBorderMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.StyleBorderMenuItem.Name = "StyleBorderMenuItem";
-            this.StyleBorderMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.StyleBorderMenuItem.Size = new System.Drawing.Size(141, 22);
             this.StyleBorderMenuItem.Text = "&Border";
             this.StyleBorderMenuItem.Click += new System.EventHandler(this.StyleBorderMenuItem_Click);
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(138, 6);
             this.toolStripSeparator5.Visible = false;
             // 
             // StyleCounterMenuItem
             // 
             this.StyleCounterMenuItem.CheckOnClick = true;
             this.StyleCounterMenuItem.Name = "StyleCounterMenuItem";
-            this.StyleCounterMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.StyleCounterMenuItem.Size = new System.Drawing.Size(141, 22);
             this.StyleCounterMenuItem.Text = "&Count Down";
             this.StyleCounterMenuItem.Visible = false;
             this.StyleCounterMenuItem.Click += new System.EventHandler(this.StyleCounterMenuItem_Click);
@@ -377,13 +388,13 @@ namespace SwitchWinClock
             this.ForeColorSetMenuItem,
             this.ForeColorTransparentMenuItem});
             this.ForeColorMenuItem.Name = "ForeColorMenuItem";
-            this.ForeColorMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ForeColorMenuItem.Size = new System.Drawing.Size(140, 22);
             this.ForeColorMenuItem.Text = "&Font";
             // 
             // ForeColorSetMenuItem
             // 
             this.ForeColorSetMenuItem.Name = "ForeColorSetMenuItem";
-            this.ForeColorSetMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ForeColorSetMenuItem.Size = new System.Drawing.Size(167, 22);
             this.ForeColorSetMenuItem.Text = "&Pick Color";
             this.ForeColorSetMenuItem.Click += new System.EventHandler(this.ForeColorSetMenuItem_Click);
             // 
@@ -391,9 +402,33 @@ namespace SwitchWinClock
             // 
             this.ForeColorTransparentMenuItem.CheckOnClick = true;
             this.ForeColorTransparentMenuItem.Name = "ForeColorTransparentMenuItem";
-            this.ForeColorTransparentMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ForeColorTransparentMenuItem.Size = new System.Drawing.Size(167, 22);
             this.ForeColorTransparentMenuItem.Text = "&Make Transparent";
             this.ForeColorTransparentMenuItem.Click += new System.EventHandler(this.ColorTransparentMenuItem_Click);
+            // 
+            // FontBorderColorMenuItem
+            // 
+            this.FontBorderColorMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.TextBorderSetColorMenuItem,
+            this.TextBorderTransparentMenuItem});
+            this.FontBorderColorMenuItem.Name = "FontBorderColorMenuItem";
+            this.FontBorderColorMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.FontBorderColorMenuItem.Text = "&Font Border";
+            // 
+            // TextBorderSetColorMenuItem
+            // 
+            this.TextBorderSetColorMenuItem.Name = "TextBorderSetColorMenuItem";
+            this.TextBorderSetColorMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.TextBorderSetColorMenuItem.Text = "&Pick Color";
+            this.TextBorderSetColorMenuItem.Click += new System.EventHandler(this.TextBorderSetColorMenuItem_Click);
+            // 
+            // TextBorderTransparentMenuItem
+            // 
+            this.TextBorderTransparentMenuItem.CheckOnClick = true;
+            this.TextBorderTransparentMenuItem.Name = "TextBorderTransparentMenuItem";
+            this.TextBorderTransparentMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.TextBorderTransparentMenuItem.Text = "&Make Transparent";
+            this.TextBorderTransparentMenuItem.Click += new System.EventHandler(this.ColorTransparentMenuItem_Click);
             // 
             // BackColorMenuItem
             // 
@@ -401,13 +436,13 @@ namespace SwitchWinClock
             this.BackColorSetMenuItem,
             this.BackColorTransparentMenuItem});
             this.BackColorMenuItem.Name = "BackColorMenuItem";
-            this.BackColorMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.BackColorMenuItem.Size = new System.Drawing.Size(140, 22);
             this.BackColorMenuItem.Text = "For&m";
             // 
             // BackColorSetMenuItem
             // 
             this.BackColorSetMenuItem.Name = "BackColorSetMenuItem";
-            this.BackColorSetMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.BackColorSetMenuItem.Size = new System.Drawing.Size(167, 22);
             this.BackColorSetMenuItem.Text = "&Pick Color";
             this.BackColorSetMenuItem.Click += new System.EventHandler(this.BackColorSetMenuItem_Click);
             // 
@@ -415,7 +450,7 @@ namespace SwitchWinClock
             // 
             this.BackColorTransparentMenuItem.CheckOnClick = true;
             this.BackColorTransparentMenuItem.Name = "BackColorTransparentMenuItem";
-            this.BackColorTransparentMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.BackColorTransparentMenuItem.Size = new System.Drawing.Size(167, 22);
             this.BackColorTransparentMenuItem.Text = "&Make Transparent";
             this.BackColorTransparentMenuItem.Click += new System.EventHandler(this.ColorTransparentMenuItem_Click);
             // 
@@ -425,13 +460,13 @@ namespace SwitchWinClock
             this.BorderColorSetMenuItem,
             this.BorderColorTransparentMenuItem});
             this.BorderColorMenuItem.Name = "BorderColorMenuItem";
-            this.BorderColorMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.BorderColorMenuItem.Size = new System.Drawing.Size(140, 22);
             this.BorderColorMenuItem.Text = "For&m Border";
             // 
             // BorderColorSetMenuItem
             // 
             this.BorderColorSetMenuItem.Name = "BorderColorSetMenuItem";
-            this.BorderColorSetMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.BorderColorSetMenuItem.Size = new System.Drawing.Size(167, 22);
             this.BorderColorSetMenuItem.Text = "&Pick Color";
             this.BorderColorSetMenuItem.Click += new System.EventHandler(this.BorderColorSetMenuItem_Click);
             // 
@@ -439,33 +474,9 @@ namespace SwitchWinClock
             // 
             this.BorderColorTransparentMenuItem.CheckOnClick = true;
             this.BorderColorTransparentMenuItem.Name = "BorderColorTransparentMenuItem";
-            this.BorderColorTransparentMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.BorderColorTransparentMenuItem.Size = new System.Drawing.Size(167, 22);
             this.BorderColorTransparentMenuItem.Text = "&Make Transparent";
             this.BorderColorTransparentMenuItem.Click += new System.EventHandler(this.ColorTransparentMenuItem_Click);
-            // 
-            // FontBorderColorMenuItem
-            // 
-            this.FontBorderColorMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.TextBorderSetColorMenuItem,
-            this.TextBorderTransparentMenuItem});
-            this.FontBorderColorMenuItem.Name = "FontBorderColorMenuItem";
-            this.FontBorderColorMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.FontBorderColorMenuItem.Text = "&Font Border";
-            // 
-            // TextBorderSetColorMenuItem
-            // 
-            this.TextBorderSetColorMenuItem.Name = "TextBorderSetColorMenuItem";
-            this.TextBorderSetColorMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.TextBorderSetColorMenuItem.Text = "&Pick Color";
-            this.TextBorderSetColorMenuItem.Click += new System.EventHandler(this.TextBorderSetColorMenuItem_Click);
-            // 
-            // TextBorderTransparentMenuItem
-            // 
-            this.TextBorderTransparentMenuItem.CheckOnClick = true;
-            this.TextBorderTransparentMenuItem.Name = "TextBorderTransparentMenuItem";
-            this.TextBorderTransparentMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.TextBorderTransparentMenuItem.Text = "&Make Transparent";
-            this.TextBorderTransparentMenuItem.Click += new System.EventHandler(this.ColorTransparentMenuItem_Click);
             // 
             // TextDepthpMenuItem
             // 
@@ -592,21 +603,19 @@ namespace SwitchWinClock
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
             // 
+            // ExitAllMenuItem
+            // 
+            this.ExitAllMenuItem.Name = "ExitAllMenuItem";
+            this.ExitAllMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ExitAllMenuItem.Text = "E&xit All Instances";
+            this.ExitAllMenuItem.Click += new System.EventHandler(this.ExitAllMenuItem_Click);
+            // 
             // ExitMenuItem
             // 
             this.ExitMenuItem.Name = "ExitMenuItem";
             this.ExitMenuItem.Size = new System.Drawing.Size(180, 22);
             this.ExitMenuItem.Text = "E&xit";
             this.ExitMenuItem.Click += new System.EventHandler(this.ExitMenuItem_Click);
-            // 
-            // StyleShadowMenuItem
-            // 
-            this.StyleShadowMenuItem.CheckOnClick = true;
-            this.StyleShadowMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.StyleShadowMenuItem.Name = "StyleShadowMenuItem";
-            this.StyleShadowMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.StyleShadowMenuItem.Text = "&Shadowed";
-            this.StyleShadowMenuItem.Click += new System.EventHandler(this.StyleShadowMenuItem_Click);
             // 
             // DisplayForm
             // 
@@ -625,6 +634,7 @@ namespace SwitchWinClock
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form_Closing);
             this.Load += new System.EventHandler(this.Form_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form_Paint);
+            this.LostFocus += new System.EventHandler(this.Form_LostFocus);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Form_MouseClick);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form_MouseDown);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form_MouseMove);
@@ -697,6 +707,7 @@ namespace SwitchWinClock
         private System.Windows.Forms.ToolStripMenuItem AvailableInstanceMenuItem;
         private System.Windows.Forms.ToolStripMenuItem RenameInstanceMenuItem;
         private System.Windows.Forms.ToolStripMenuItem StyleShadowMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ExitAllMenuItem;
     }
 }
 

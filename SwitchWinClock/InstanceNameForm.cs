@@ -67,6 +67,12 @@ namespace SwitchWinClock
             this.Drag = false;  //shouldn't be set.
         }
 
+        private void Control_LostFocus(object sender, EventArgs e)
+        {
+            if (this.Drag)
+                this.Drag = false;  //shouldn't be set.
+        }
+
         private void Control_MouseMove(object sender, MouseEventArgs e)
         {
             if (this.Drag)

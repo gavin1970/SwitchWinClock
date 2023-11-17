@@ -137,12 +137,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="lib\debug\TruTimeZones.dll" />
-    <Content Include="lib\debug\TruTimeZones.ico" />
-    <Content Include="lib\debug\TruTimeZones.pdb" />
-    <Content Include="lib\release\TruTimeZones.dll" />
-    <Content Include="lib\release\TruTimeZones.ico" />
-    <Content Include="lib\release\TruTimeZones.pdb" />
     <Content Include="switch.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
