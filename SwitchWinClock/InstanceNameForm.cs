@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Security.Policy;
 using System.Windows.Forms;
 using SwitchWinClock.utils;
 using TruTimeZones;
@@ -14,8 +15,12 @@ namespace SwitchWinClock
         public InstanceNameForm()
         {
             InitializeComponent();
-            foreach(TruTimeZone zone in SCConfig.GetTimeZones())
+            this.TimeZoneComboBox.Items.Clear();
+            this.TimeZoneComboBox.Items.Add("Current Timezone");
+            foreach (TruTimeZone zone in SCConfig.GetTimeZones())
                 this.TimeZoneComboBox.Items.Add(zone.DisplayName);
+
+            this.TimeZoneComboBox.SelectedIndex = 0;
         }
 
         public string InstanceName { get; set; }

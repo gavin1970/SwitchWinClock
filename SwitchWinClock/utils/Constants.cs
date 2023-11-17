@@ -15,6 +15,29 @@ namespace SwitchWinClock.utils
         public const string TextDepthText = "&Text Depth";
     }
 
+    internal class ExampleDateTimeFormats
+    {
+        public const string dddd_MMMdd_hhmmss_tt = "dddd, MMM dd, hh:mm:ss tt";
+        public const string ddd_MMMdd_HHmmss = "ddd, MMM dd, HH:mm:ss";
+        public const string dddd_MMMMdd = "dddd, MMMM dd";
+        public const string hhmmss_tt = "hh:mm:ss tt";
+        public const string z_hhmmss_tt = "(z) hh:mm:ss tt";
+        public const string zz_hhmmss_tt = "(zz) hh:mm:ss tt";
+        public const string zzz_hhmmss_tt = "(zzz) hh:mm:ss tt";
+        public const string zzzz_id = "(zzzz) - {id}";
+        public const string Text_hhmmss = @"Cu\s\to\m \tex\t exa\mple: hh:mm:ss";
+
+        internal static FieldInfo[] GetFormats
+        {
+            get
+            {
+                return typeof(ExampleDateTimeFormats).GetFields(
+                                        BindingFlags.Public |
+                                        BindingFlags.Static |
+                                        BindingFlags.FlattenHierarchy);
+            }
+        }
+    }
     internal class ColNames
     {
         public const string InstanceName = "InstanceName";

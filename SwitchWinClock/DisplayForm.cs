@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Drawing;
 using System.Threading;
+using System.Reflection;
 using System.Diagnostics;
 using System.Drawing.Text;
 using System.ComponentModel;
@@ -41,7 +42,7 @@ namespace SwitchWinClock
         /// <summary>
         /// TODO: Future make this more dynamic based on single character Font Max size when set and to set Form width.
         /// </summary>
-        private static int FormAllowDiff { get; set; } = 20;
+        //private static int FormAllowDiff { get; set; } = 20;
 
         private int m_waitTimer = 60000;  //default: 1 min
 
@@ -65,10 +66,12 @@ namespace SwitchWinClock
 
             this.SetupMenuChecks();
             this.SetCheckTextDepth(config.TextBorderDepth);
+            this.AddExampleDateFormats();
             this.SetDateFormatMenus();
             this.SetFormLocation();
             this.SetWinAlignCheckDefault();
         }
+
         private bool SetInstanceName(bool isNew)
         {
             TruTimeZone tzFound = TimeZoneSearch.SearchById(config.TimeZone) ?? Global.CurrentTimeZone();
@@ -174,15 +177,6 @@ namespace SwitchWinClock
                 g.FillRectangle(new SolidBrush(config.BackColor), rect);
             if (config.FormBorderColor.A != 0)      // if not clear
                 g.DrawRectangle(new Pen(config.FormBorderColor, 2), rect);
-        }
-        private void DrawCloseButton(Graphics g, StringFormat sFormat)
-        {
-            int buttonSize = 15;
-            Rectangle rect = new Rectangle() { Height = buttonSize, Width = buttonSize, X = this.ClientSize.Width - (buttonSize + 5), Y = 5 };
-
-            g.FillRectangle(Brushes.Red, rect);
-            g.DrawString("X", ButtonFont, Brushes.White, rect, sFormat);
-            g.DrawRectangle(new Pen(Brushes.Gray, 2), rect);
         }
         private void SetFormLocation()
         {
@@ -376,34 +370,44 @@ namespace SwitchWinClock
             this.AlwaysOnTopMenuItem.Checked = config.AlwaysOnTop;
             this.TopMost = config.AlwaysOnTop;
         }
+        private void AddExampleDateFormats()
+        {
+            foreach (FieldInfo field in ExampleDateTimeFormats.GetFormats)
+            {
+                if (!DateFormattingMenuItem.DropDownItems.ContainsKey(field.Name))
+                {
+                    var tsi = new ToolStripMenuItem()
+                    {
+                        Name = field.Name,
+                        Text = (string)field.GetValue(field.Name)
+                    };
+                    tsi.Click += new EventHandler(this.DateFormatItem_Click);
+
+                    DateFormattingMenuItem.DropDownItems.Add(tsi);
+                }
+            }
+        }
         private void SetDateFormatMenus(ToolStripMenuItem menuItem = null)
         {
             string format;
             //only null went submitted by custome text.
             if (menuItem == null)
-            {
                 format = config.DateFormat;
-                foreach (ToolStripMenuItem tsi in DateFormattingMenuItem.DropDownItems)
-                {
-                    if (format == tsi.Text)
-                        tsi.Checked = true;
-                    else
-                        tsi.Checked = false;
-                }
-            }
             else
             {
-                //uncheck all the others, checking only the one selected.
-                foreach (ToolStripMenuItem tsi in DateFormattingMenuItem.DropDownItems)
-                {
-                    if (menuItem.Text == tsi.Text)
-                        tsi.Checked = true;
-                    else
-                        tsi.Checked = false;
-                }
-
                 format = menuItem.Text;
                 config.DateFormat = format;
+            }
+
+            foreach (var tsi in DateFormattingMenuItem.DropDownItems)
+            {
+                if (tsi.GetType() == typeof(ToolStripMenuItem))
+                {
+                    if (format == ((ToolStripMenuItem)tsi).Text)
+                        ((ToolStripMenuItem)tsi).Checked = true;
+                    else
+                        ((ToolStripMenuItem)tsi).Checked = false;
+                }
             }
 
             //even though it's checked, we will add it to custom
@@ -522,6 +526,8 @@ namespace SwitchWinClock
                     break;
             }
 
+            //this is here, because maybe there is Custom Text and they want a z in it.  if escaped, I needed to
+            //move it to something that should never be used and then change it back later.
             string dtFormat = config.DateFormat;
             if (dtFormat.Contains("\\z"))
                 dtFormat = dtFormat.Replace("\\z", "#{¿}#");
@@ -529,21 +535,18 @@ namespace SwitchWinClock
             if (dtFormat.Contains("z"))
             {
                 TimeSpan tzOffSet = config.InstanceTimeZone.IsDaylightSavingTime ? config.InstanceTimeZone.DSTUtcOffset : config.InstanceTimeZone.BaseUtcOffset;
-                string addminus = tzOffSet.Hours < 0 ? "-" : "+";
+                string addminus = tzOffSet.Hours > 0 ? "+" : "";    //want to add a + in front of timezone
 
                 if (dtFormat.Contains("zzzz"))
-                    dtFormat = dtFormat.Replace("zzzz", $"{addminus}{tzOffSet:hh\\:mm}");
+                    dtFormat = dtFormat.Replace("zzzz", $"{addminus}{tzOffSet.Hours:00}:{Math.Abs(tzOffSet.Minutes):00}");
                 if (dtFormat.Contains("zzz"))
-                    dtFormat = dtFormat.Replace("zzz", $"{addminus}{tzOffSet:h\\:mm}");
+                    dtFormat = dtFormat.Replace("zzz", $"{addminus}{tzOffSet.Hours:0}:{Math.Abs(tzOffSet.Minutes):00}");
                 if (dtFormat.Contains("zz"))
-                    dtFormat = dtFormat.Replace("zz", $"{addminus}{tzOffSet:hh}");
+                    dtFormat = dtFormat.Replace("zz", $"{addminus}{tzOffSet.Hours:00}");
                 if (dtFormat.Contains("z"))
-                    dtFormat = dtFormat.Replace("z", $"{addminus}{tzOffSet:hh}");  //single h without mm fails
+                    dtFormat = dtFormat.Replace("z", $"{addminus}{tzOffSet.Hours}");
 
             }
-
-            if (dtFormat.Contains("#{¿}#"))
-                dtFormat = dtFormat.Replace("#{¿}#", "z");
 
             //if the user is using the {id} variable, and because timezones have characters that will set
             //time, this is a shortcut until after Date Formatting.
@@ -552,6 +555,12 @@ namespace SwitchWinClock
 
             //forate the date based on users requirement
             string dt = config.InstanceTime.ToString(dtFormat);
+
+            //this couldn't be done before the string formatting above.
+            //Throws errors.  Since it's custom text, we can change it back here.
+            //if custom text with escape z, then change it back to z.
+            if (dt.Contains("#{¿}#"))
+                dt = dt.Replace("#{¿}#", "z");
 
             //now lets check and if exists still, lets replace it with the timezoneID
             if (dt.Contains(@"{id}"))
@@ -572,14 +581,8 @@ namespace SwitchWinClock
             if (sugWidth > newHeight)
                 newWidth = sugWidth;
 
-            //in attempt to not allow the form jump around because of size of font characters, this gives a little allowances.
-            //int wDiff = newWidth > this.ClientSize.Width ? newWidth - this.ClientSize.Width : this.ClientSize.Width - newWidth;
-            //int hDiff = newHeight > this.ClientSize.Height ? newHeight - this.ClientSize.Height : this.ClientSize.Height - Height;
-            //if (wDiff > FormAllowDiff || hDiff > FormAllowDiff)
-            {
-                this.ClientSize = new Size(newWidth, newHeight);
-                sz = new Size(this.ClientSize.Width, this.ClientSize.Height);
-            }
+            this.ClientSize = new Size(newWidth, newHeight);
+            sz = new Size(this.ClientSize.Width, this.ClientSize.Height);
 
             StringFormat sFormat = new StringFormat()
             {
@@ -587,8 +590,6 @@ namespace SwitchWinClock
                 Alignment = StringAlignment.Center
             }; //GetTextAlignment();
 
-            //int advColor = (config.ForeColor.R + config.ForeColor.G + config.ForeColor.B) / 3;
-            //int tColor = advColor < 128 ? advColor + 128 : advColor - 128;
             int tColor = 230;   //TODO: working on how I want this dynamically set.
             int bColor = tColor > 128 ? tColor - 128 : tColor;
             tColor = tColor > 128 ? tColor : 255 - tColor;

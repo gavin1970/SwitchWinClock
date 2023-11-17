@@ -148,10 +148,10 @@
             this.LblTitle.TabIndex = 0;
             this.LblTitle.Text = "Provide a name for instance reference.";
             this.LblTitle.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.LblTitle.LostFocus += new System.EventHandler(this.Control_LostFocus);
             this.LblTitle.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Control_MouseDown);
             this.LblTitle.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Control_MouseMove);
             this.LblTitle.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Control_MouseUp);
-            this.LblTitle.LostFocus += new System.EventHandler(this.Control_LostFocus);
             // 
             // InstanceNameForm
             // 

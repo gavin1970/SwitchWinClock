@@ -58,10 +58,6 @@ namespace SwitchWinClock
             this.DateFormattingMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CustomDateFormatMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CustomDateTextBox = new System.Windows.Forms.ToolStripTextBox();
-            this.PresetDateFormatItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.PresetDateFormatItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.PresetDateFormatItem3 = new System.Windows.Forms.ToolStripMenuItem();
-            this.PresetDateFormatItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.CounterFormattingMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CounterYMDHMSMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ColorSetupMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -95,6 +91,7 @@ namespace SwitchWinClock
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.ExitAllMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.SettingsContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -304,10 +301,7 @@ namespace SwitchWinClock
             // 
             this.DateFormattingMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.CustomDateFormatMenuItem,
-            this.PresetDateFormatItem1,
-            this.PresetDateFormatItem2,
-            this.PresetDateFormatItem3,
-            this.PresetDateFormatItem4});
+            this.toolStripSeparator6});
             this.DateFormattingMenuItem.Name = "DateFormattingMenuItem";
             this.DateFormattingMenuItem.Size = new System.Drawing.Size(180, 22);
             this.DateFormattingMenuItem.Text = "&Date Formating";
@@ -317,43 +311,15 @@ namespace SwitchWinClock
             this.CustomDateFormatMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.CustomDateTextBox});
             this.CustomDateFormatMenuItem.Name = "CustomDateFormatMenuItem";
-            this.CustomDateFormatMenuItem.Size = new System.Drawing.Size(227, 22);
+            this.CustomDateFormatMenuItem.Size = new System.Drawing.Size(180, 22);
             this.CustomDateFormatMenuItem.Text = "&Custom Format";
+            this.CustomDateFormatMenuItem.ToolTipText = "Pressing Enter will save.";
             // 
             // CustomDateTextBox
             // 
-            this.CustomDateTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.CustomDateTextBox.Name = "CustomDateTextBox";
             this.CustomDateTextBox.Size = new System.Drawing.Size(300, 23);
             this.CustomDateTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.CustomDateTextBox_KeyUp);
-            // 
-            // PresetDateFormatItem1
-            // 
-            this.PresetDateFormatItem1.Name = "PresetDateFormatItem1";
-            this.PresetDateFormatItem1.Size = new System.Drawing.Size(227, 22);
-            this.PresetDateFormatItem1.Text = "dddd, MMM dd, hh:mm:ss tt";
-            this.PresetDateFormatItem1.Click += new System.EventHandler(this.DateFormatItem_Click);
-            // 
-            // PresetDateFormatItem2
-            // 
-            this.PresetDateFormatItem2.Name = "PresetDateFormatItem2";
-            this.PresetDateFormatItem2.Size = new System.Drawing.Size(227, 22);
-            this.PresetDateFormatItem2.Text = "ddd, MMM dd, hh:mm:ss tt";
-            this.PresetDateFormatItem2.Click += new System.EventHandler(this.DateFormatItem_Click);
-            // 
-            // PresetDateFormatItem3
-            // 
-            this.PresetDateFormatItem3.Name = "PresetDateFormatItem3";
-            this.PresetDateFormatItem3.Size = new System.Drawing.Size(227, 22);
-            this.PresetDateFormatItem3.Text = "hh:mm:ss tt";
-            this.PresetDateFormatItem3.Click += new System.EventHandler(this.DateFormatItem_Click);
-            // 
-            // PresetDateFormatItem4
-            // 
-            this.PresetDateFormatItem4.Name = "PresetDateFormatItem4";
-            this.PresetDateFormatItem4.Size = new System.Drawing.Size(227, 22);
-            this.PresetDateFormatItem4.Text = "dddd, MMM dd";
-            this.PresetDateFormatItem4.Click += new System.EventHandler(this.DateFormatItem_Click);
             // 
             // CounterFormattingMenuItem
             // 
@@ -617,6 +583,11 @@ namespace SwitchWinClock
             this.ExitMenuItem.Text = "E&xit";
             this.ExitMenuItem.Click += new System.EventHandler(this.ExitMenuItem_Click);
             // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(177, 6);
+            // 
             // DisplayForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -670,10 +641,6 @@ namespace SwitchWinClock
         private System.Windows.Forms.ToolStripMenuItem BorderColorSetMenuItem;
         private System.Windows.Forms.ToolStripMenuItem DateFormattingMenuItem;
         private System.Windows.Forms.ToolStripMenuItem CustomDateFormatMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem PresetDateFormatItem1;
-        private System.Windows.Forms.ToolStripMenuItem PresetDateFormatItem2;
-        private System.Windows.Forms.ToolStripMenuItem PresetDateFormatItem3;
-        private System.Windows.Forms.ToolStripMenuItem PresetDateFormatItem4;
         private System.Windows.Forms.ToolStripTextBox CustomDateTextBox;
         private System.Windows.Forms.ToolStripMenuItem ForeColorTransparentMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ForeColorSetMenuItem;
@@ -708,6 +675,7 @@ namespace SwitchWinClock
         private System.Windows.Forms.ToolStripMenuItem RenameInstanceMenuItem;
         private System.Windows.Forms.ToolStripMenuItem StyleShadowMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ExitAllMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
     }
 }
 
