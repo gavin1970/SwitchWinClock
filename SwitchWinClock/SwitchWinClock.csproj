@@ -141,6 +141,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>C:\Code\~VBS\setVersion.vbs "$(ProjectDir)"</PreBuildEvent>
+    <PreBuildEvent>if $(ConfigurationName) == Release (
+  C:\Code\~VBS\setVersionByDate.vbs "$(ProjectDir)" T
+)</PreBuildEvent>
   </PropertyGroup>
 </Project>
