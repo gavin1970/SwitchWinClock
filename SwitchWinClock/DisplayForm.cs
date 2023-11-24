@@ -70,8 +70,34 @@ namespace SwitchWinClock
             this.SetDateFormatMenus();
             this.SetFormLocation();
             this.SetWinAlignCheckDefault();
+            this.SetFormBGColor();
         }
 
+        private void SetFormBGColor()
+        {
+            Color borderColors;
+            if (config.ClockStyle.Equals(Clock_Style.Border)) 
+            {
+                if(config.TextBorderColor.A.Equals(0))
+                    borderColors = config.ForeColor;
+                else
+                    borderColors = config.TextBorderColor;
+            }
+            else
+            {
+                if (config.ClockStyle.Equals(Clock_Style.Shadowed))
+                    borderColors = Color.FromArgb(255, ShadowColor, ShadowColor, ShadowColor);
+                else
+                    borderColors = Color.FromArgb(255, DepthColor, DepthColor, DepthColor);
+            }
+
+            int r = borderColors.R < 128 ? borderColors.R + 1 : borderColors.R - 1;
+            int g = borderColors.G < 128 ? borderColors.G + 1 : borderColors.G - 1;
+            int b = borderColors.B < 128 ? borderColors.B + 1 : borderColors.B - 1;
+
+            this.BackColor = Color.FromArgb(255, r, g, b);
+            this.TransparencyKey = this.BackColor;
+        }
         private bool SetInstanceName(bool isNew)
         {
             TruTimeZone tzFound = TimeZoneSearch.SearchById(config.TimeZone) ?? Global.CurrentTimeZone();
@@ -110,6 +136,21 @@ namespace SwitchWinClock
         private AutoResetEvent[] SWCEvents { get; set; } = null;    //could be shut down event or new message event
         private bool Drag { get; set; }
         private Point StartPoint { get; set; } = Point.Empty;
+        private int DepthColor 
+        { 
+            get 
+            {
+                return 230; //TODO: working on how I want this dynamically set.
+            }
+        }
+        private int ShadowColor 
+        { 
+            get 
+            { 
+                return DepthColor > 128 ? DepthColor - 128 : (int)(DepthColor / 2);
+            } 
+        }
+
         private StringFormat GetTextAlignment()
         {
             StringFormat stringFormat;
@@ -459,13 +500,8 @@ namespace SwitchWinClock
                 }
                 else if (fi.Exists && fi.LastWriteTimeUtc < DateTime.UtcNow.AddSeconds(-Global.MaxImAliveSeconds))
                 {
-                    //MessageBox.Show("otherRunning is being set.");
                     othersRunning = true;
                 }
-                //else
-                //{
-                //    MessageBox.Show($"ID: {id},  Exists: {fi.Exists},  LastWrite: {fi.LastWriteTimeUtc} < {DateTime.UtcNow.AddSeconds(-Global.MaxImAliveSeconds)} = {(fi.LastWriteTimeUtc<DateTime.UtcNow.AddSeconds(-Global.MaxImAliveSeconds))}");
-                //}
             }
 
             this.AvailableInstanceMenuItem.Visible = AvailableInstanceMenuItem.DropDownItems.Count != 0;
@@ -590,10 +626,6 @@ namespace SwitchWinClock
                 Alignment = StringAlignment.Center
             }; //GetTextAlignment();
 
-            int tColor = 230;   //TODO: working on how I want this dynamically set.
-            int bColor = tColor > 128 ? tColor - 128 : tColor;
-            tColor = tColor > 128 ? tColor : 255 - tColor;
-
             DrawForm(g, this.ClientSize);
 
             if (config.ClockStyle == Clock_Style.Border)
@@ -615,13 +647,13 @@ namespace SwitchWinClock
                 if (config.ClockStyle == Clock_Style.Shadowed || config.ClockStyle == Clock_Style.Depth_Shadowed)
                 {
                     for (int i = 1; i <= depth; i++)
-                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
+                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, ShadowColor, ShadowColor, ShadowColor)), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
                 }
 
                 if (config.ClockStyle == Clock_Style.Depth || config.ClockStyle == Clock_Style.Depth_Shadowed)
                 {
                     for (int i = 1; i <= depth; i++)
-                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
+                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, DepthColor, DepthColor, DepthColor)), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
                 }
 
                 //########################################
@@ -898,6 +930,8 @@ namespace SwitchWinClock
             }
             else
                 this.StyleDeptMenuItem.Checked = true;      //reject unchecking, since nothing is checked.
+
+            SetFormBGColor();
         }
         private void StyleShadowMenuItem_Click(object sender, EventArgs e)
         {
@@ -916,6 +950,8 @@ namespace SwitchWinClock
             }
             else
                 this.StyleShadowMenuItem.Checked = true;   //reject unchecking, since nothing is checked.
+
+            SetFormBGColor();
         }
         private void StyleBorderMenuItem_Click(object sender, EventArgs e)
         {
@@ -926,6 +962,8 @@ namespace SwitchWinClock
             if (!StyleBorderMenuItem.Checked)
                 StyleBorderMenuItem.Checked = true;
             FontBorderColorMenuItem.Visible = true;
+
+            SetFormBGColor();
         }
         private void TextBorderSetColorMenuItem_Click(object sender, EventArgs e)
         {
