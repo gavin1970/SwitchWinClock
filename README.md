@@ -1,6 +1,6 @@
 # SwitchWinClock
 
-With the use of [TruTimeZones[(https://github.com/gavin1970/TruTimeZones) This is a very dynamic desktop clock.  Create up to 10 instances of it, each under a different timezones.  Completely custom date/time formatting.
+With the use of [TruTimeZones](https://github.com/gavin1970/TruTimeZones) This is a very dynamic desktop clock.  Create up to 10 instances of it, each under a different timezones.  Completely custom date/time formatting.
 
 ## Build with
 - Visual Studio 2022 Professional
