@@ -75,28 +75,35 @@ namespace SwitchWinClock
 
         private void SetFormBGColor()
         {
-            Color borderColors;
-            if (config.ClockStyle.Equals(Clock_Style.Border)) 
-            {
-                if(config.TextBorderColor.A.Equals(0))
-                    borderColors = config.ForeColor;
-                else
-                    borderColors = config.TextBorderColor;
-            }
-            else
-            {
-                if (config.ClockStyle.Equals(Clock_Style.Shadowed))
-                    borderColors = Color.FromArgb(255, ShadowColor, ShadowColor, ShadowColor);
-                else
-                    borderColors = Color.FromArgb(255, DepthColor, DepthColor, DepthColor);
-            }
+            ///was seeing small borders of background/transparency, while using 
+            ///a pinkesh color.  I found when I used borders with any color than
+            ///black or white, I couldn't click through the numbers.  Hardcoding
+            ///for now, will have to revisit if I start seeing black, when I shouldn't.
 
-            int r = borderColors.R < 128 ? borderColors.R + 1 : borderColors.R - 1;
-            int g = borderColors.G < 128 ? borderColors.G + 1 : borderColors.G - 1;
-            int b = borderColors.B < 128 ? borderColors.B + 1 : borderColors.B - 1;
+            return;
+            //Color borderColors;
+            //if (config.ClockStyle.Equals(Clock_Style.Border)) 
+            //{
+            //    if(config.TextBorderColor.A.Equals(0))
+            //        borderColors = config.ForeColor;
+            //    else
+            //        borderColors = config.TextBorderColor;
+            //}
+            //else
+            //{
+            //    if (config.ClockStyle.Equals(Clock_Style.Shadowed))
+            //        borderColors = Color.FromArgb(255, ShadowColor, ShadowColor, ShadowColor);
+            //    else
+            //        borderColors = Color.FromArgb(255, DepthColor, DepthColor, DepthColor);
+            //}
 
-            this.BackColor = Color.FromArgb(255, r, g, b);
-            this.TransparencyKey = this.BackColor;
+            //int a = borderColors.A < 128 ? borderColors.A + 1 : borderColors.A - 1;
+            //int r = borderColors.R < 128 ? borderColors.R + 1 : borderColors.R - 1;
+            //int g = borderColors.G < 128 ? borderColors.G + 1 : borderColors.G - 1;
+            //int b = borderColors.B < 128 ? borderColors.B + 1 : borderColors.B - 1;
+
+            //this.BackColor = Color.FromArgb(255, r, g, b);
+            //this.TransparencyKey = this.BackColor;
         }
         private bool SetInstanceName(bool isNew)
         {
@@ -526,6 +533,9 @@ namespace SwitchWinClock
             Log.WriteLine("Starting Counter Thread.");
             Thread thread = new Thread(() => { StartCounter(); });
             thread.Start();
+
+            this.BackColor = Color.FromArgb(255, 1, 1, 1);
+            this.TransparencyKey = this.BackColor;
         }
         private void Form_Paint(object sender, PaintEventArgs e)
         {
