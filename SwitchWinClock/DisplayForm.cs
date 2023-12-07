@@ -111,15 +111,27 @@ namespace SwitchWinClock
         private AutoResetEvent[] SWCEvents { get; set; } = null;    //could be shut down event or new message event
         private bool Drag { get; set; }
         private Point StartPoint { get; set; } = Point.Empty;
+        private int ValidColor(int c)
+        {
+            if (c < 100)
+                c += 100;
+            else if (c > 255)
+                c = 255;
+
+            return c;
+        }
         private Color DepthColor
         { 
             get 
             {
-                int R = config.TextBorderColor.A == 0 ? config.ForeColor.R : config.TextBorderColor.R;
-                int G = config.TextBorderColor.A == 0 ? config.ForeColor.G : config.TextBorderColor.G;
-                int B = config.TextBorderColor.A == 0 ? config.ForeColor.B : config.TextBorderColor.B;
+                int brighten = 5;
+                //this allows user to made text border transparent.
+                //This makes depth based on text color automatically.
+                int R = ValidColor(config.TextBorderColor.A == 0 ? config.ForeColor.R + brighten : config.TextBorderColor.R);
+                int G = ValidColor(config.TextBorderColor.A == 0 ? config.ForeColor.G + brighten : config.TextBorderColor.G);
+                int B = ValidColor(config.TextBorderColor.A == 0 ? config.ForeColor.B + brighten : config.TextBorderColor.B);
 
-                return Color.FromArgb(255, R, G, B);
+                return Color.FromArgb(128, R, G, B);
             }
         }
         private Color ShadowColor 
