@@ -16,7 +16,7 @@ namespace SwitchWinClock
         Border = 0,
         Depth = 1,
         Shadowed = 2,
-        Depth_Shadowed = 3
+        Depth_Shadowed = Depth | Shadowed
     }
 
     internal class SCConfig

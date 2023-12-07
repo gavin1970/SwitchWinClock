@@ -12,6 +12,7 @@ using System.Drawing.Drawing2D;
 using System.Text.RegularExpressions;
 using SwitchWinClock.utils;
 using TruTimeZones;
+using System.Collections.Generic;
 
 namespace SwitchWinClock
 {
@@ -70,41 +71,8 @@ namespace SwitchWinClock
             this.SetDateFormatMenus();
             this.SetFormLocation();
             this.SetWinAlignCheckDefault();
-            this.SetFormBGColor();
         }
 
-        private void SetFormBGColor()
-        {
-            ///was seeing small borders of background/transparency, while using 
-            ///a pinkesh color.  I found when I used borders with any color than
-            ///black or white, I couldn't click through the numbers.  Hardcoding
-            ///for now, will have to revisit if I start seeing black, when I shouldn't.
-
-            return;
-            //Color borderColors;
-            //if (config.ClockStyle.Equals(Clock_Style.Border)) 
-            //{
-            //    if(config.TextBorderColor.A.Equals(0))
-            //        borderColors = config.ForeColor;
-            //    else
-            //        borderColors = config.TextBorderColor;
-            //}
-            //else
-            //{
-            //    if (config.ClockStyle.Equals(Clock_Style.Shadowed))
-            //        borderColors = Color.FromArgb(255, ShadowColor, ShadowColor, ShadowColor);
-            //    else
-            //        borderColors = Color.FromArgb(255, DepthColor, DepthColor, DepthColor);
-            //}
-
-            //int a = borderColors.A < 128 ? borderColors.A + 1 : borderColors.A - 1;
-            //int r = borderColors.R < 128 ? borderColors.R + 1 : borderColors.R - 1;
-            //int g = borderColors.G < 128 ? borderColors.G + 1 : borderColors.G - 1;
-            //int b = borderColors.B < 128 ? borderColors.B + 1 : borderColors.B - 1;
-
-            //this.BackColor = Color.FromArgb(255, r, g, b);
-            //this.TransparencyKey = this.BackColor;
-        }
         private bool SetInstanceName(bool isNew)
         {
             TruTimeZone tzFound = TimeZoneSearch.SearchById(config.TimeZone) ?? Global.CurrentTimeZone();
@@ -143,18 +111,29 @@ namespace SwitchWinClock
         private AutoResetEvent[] SWCEvents { get; set; } = null;    //could be shut down event or new message event
         private bool Drag { get; set; }
         private Point StartPoint { get; set; } = Point.Empty;
-        private int DepthColor 
+        private Color DepthColor
         { 
             get 
             {
-                return 230; //TODO: working on how I want this dynamically set.
+                int R = config.TextBorderColor.A == 0 ? config.ForeColor.R : config.TextBorderColor.R;
+                int G = config.TextBorderColor.A == 0 ? config.ForeColor.G : config.TextBorderColor.G;
+                int B = config.TextBorderColor.A == 0 ? config.ForeColor.B : config.TextBorderColor.B;
+
+                return Color.FromArgb(255, R, G, B);
             }
         }
-        private int ShadowColor 
+        private Color ShadowColor 
         { 
             get 
-            { 
-                return DepthColor > 128 ? DepthColor - 128 : (int)(DepthColor / 2);
+            {
+                int eval = 100;
+                Color baseColor = DepthColor;
+
+                int R = Math.Abs(baseColor.R > eval ? baseColor.R - eval : Math.Abs(baseColor.R / 2));
+                int G = Math.Abs(baseColor.G > eval ? baseColor.G - eval : Math.Abs(baseColor.G / 2));
+                int B = Math.Abs(baseColor.B > eval ? baseColor.B - eval : Math.Abs(baseColor.B / 2));
+
+                return Color.FromArgb(128, R, G, B);
             } 
         }
 
@@ -409,7 +388,6 @@ namespace SwitchWinClock
                 this.StyleBorderMenuItem.Checked = true;
 
             this.TextDepthpMenuItem.Text = this.StyleBorderMenuItem.Checked ? MenuText.TextBorderText : MenuText.TextDepthText;
-            this.FontBorderColorMenuItem.Visible = this.StyleBorderMenuItem.Checked;
             this.BackColorTransparentMenuItem.Checked = config.BackColor.A == 0;
             this.BorderColorTransparentMenuItem.Checked = config.FormBorderColor.A == 0;
             this.ForeColorTransparentMenuItem.Checked = config.ForeColor.A == 0;
@@ -434,6 +412,18 @@ namespace SwitchWinClock
                     DateFormattingMenuItem.DropDownItems.Add(tsi);
                 }
             }
+        }
+        private void CheckTransparency()
+        {
+            if(this.BackColorTransparentMenuItem.Checked && 
+                this.BorderColorTransparentMenuItem.Checked && 
+                this.ForeColorTransparentMenuItem.Checked && 
+                this.TextBorderTransparentMenuItem.Checked)
+            {
+                this.ForeColorTransparentMenuItem.Checked = false;
+                ColorTransparentMenuItem_Click(this.ForeColorTransparentMenuItem, null);
+            }
+
         }
         private void SetDateFormatMenus(ToolStripMenuItem menuItem = null)
         {
@@ -536,6 +526,8 @@ namespace SwitchWinClock
 
             this.BackColor = Color.FromArgb(255, 1, 1, 1);
             this.TransparencyKey = this.BackColor;
+
+            this.CheckTransparency();
         }
         private void Form_Paint(object sender, PaintEventArgs e)
         {
@@ -654,16 +646,17 @@ namespace SwitchWinClock
                 //########################################
                 //NOTE: The depth and shadow was in the same loop.  This caused paint issues with some fonts.  Splitting them up, resolved that issue.
                 //########################################
-                if (config.ClockStyle == Clock_Style.Shadowed || config.ClockStyle == Clock_Style.Depth_Shadowed)
+                //if (config.ClockStyle == Clock_Style.Shadowed || config.ClockStyle == Clock_Style.Depth_Shadowed)
+                if ((config.ClockStyle & Clock_Style.Shadowed) > 0)
                 {
                     for (int i = 1; i <= depth; i++)
-                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, ShadowColor, ShadowColor, ShadowColor)), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
+                        g.DrawString(dt, ft, new SolidBrush(ShadowColor), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
                 }
 
-                if (config.ClockStyle == Clock_Style.Depth || config.ClockStyle == Clock_Style.Depth_Shadowed)
+                if ((config.ClockStyle & Clock_Style.Depth) > 0)
                 {
                     for (int i = 1; i <= depth; i++)
-                        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, DepthColor, DepthColor, DepthColor)), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
+                        g.DrawString(dt, ft, new SolidBrush(DepthColor), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
                 }
 
                 //########################################
@@ -763,6 +756,8 @@ namespace SwitchWinClock
                 this.Drag = false;  //shouldn't be set.
                 RefreshForm();
             }
+            else
+                this.CheckTransparency();
         }
         private void Form_Closing(object sender, FormClosingEventArgs e)
         {
@@ -834,6 +829,9 @@ namespace SwitchWinClock
                     config.TextBorderColor = Color.FromArgb(isTransparent, config.TextBorderColor.R, config.TextBorderColor.G, config.TextBorderColor.B);
                     break;
             }
+
+            //make sure we didn't transparent everything
+            CheckTransparency();
         }
         private void SetCheckTextDepth(ToolStripMenuItem menuItem)
         {
@@ -860,27 +858,21 @@ namespace SwitchWinClock
         private void BackColorSetMenuItem_Click(object sender, EventArgs e)
         {
             Color defColor = config.BackColor;
-            using (ColorDialog cd = new ColorDialog())
-            {
-                cd.FullOpen = true;
-                cd.Color = config.BackColor;
-                if (cd.ShowDialog() == DialogResult.OK)
-                {
-                    config.BackColor = cd.Color;
-                    BackColorTransparentMenuItem.Checked = false;
-                }
-                else
-                    config.BackColor = defColor;
-            }
+            if (PickColor(defColor, out Color retColor))
+                config.BackColor = retColor;
         }
         private bool PickColor(Color color, out Color retColor)
         {
             bool retVal = false;
             retColor = color;
+
             using (ColorDialog cd = new ColorDialog())
             {
                 cd.FullOpen = true;
                 cd.Color = color;
+                cd.AnyColor = true;
+                cd.AllowFullOpen = true;
+                cd.ShowHelp = true;
                 if (cd.ShowDialog(this) == DialogResult.OK)
                 {
                     retColor = cd.Color;
@@ -936,12 +928,9 @@ namespace SwitchWinClock
                     config.ClockStyle = Clock_Style.Shadowed;
 
                 this.StyleBorderMenuItem.Checked = false;
-                this.FontBorderColorMenuItem.Visible = false;
             }
             else
                 this.StyleDeptMenuItem.Checked = true;      //reject unchecking, since nothing is checked.
-
-            SetFormBGColor();
         }
         private void StyleShadowMenuItem_Click(object sender, EventArgs e)
         {
@@ -956,12 +945,9 @@ namespace SwitchWinClock
                     config.ClockStyle = Clock_Style.Depth;
 
                 this.StyleBorderMenuItem.Checked = false;
-                this.FontBorderColorMenuItem.Visible = false;
             }
             else
                 this.StyleShadowMenuItem.Checked = true;   //reject unchecking, since nothing is checked.
-
-            SetFormBGColor();
         }
         private void StyleBorderMenuItem_Click(object sender, EventArgs e)
         {
@@ -971,9 +957,6 @@ namespace SwitchWinClock
             StyleShadowMenuItem.Checked = false;
             if (!StyleBorderMenuItem.Checked)
                 StyleBorderMenuItem.Checked = true;
-            FontBorderColorMenuItem.Visible = true;
-
-            SetFormBGColor();
         }
         private void TextBorderSetColorMenuItem_Click(object sender, EventArgs e)
         {
