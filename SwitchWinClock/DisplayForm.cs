@@ -598,10 +598,13 @@ namespace SwitchWinClock
 
             }
 
-            //if the user is using the {id} variable, and because timezones have characters that will set
+            //if the user is using the {id} and {dtst} }variable, and because timezones have characters that will set
             //time, this is a shortcut until after Date Formatting.
             if (dtFormat.Contains(@"{id}"))
                 dtFormat = dtFormat.Replace("{id}", @"{i\d}");
+
+            if (dtFormat.Contains(@"{dtst}"))
+                dtFormat = dtFormat.Replace("{dtst}", @"{\d\t\s\t}");
 
             //forate the date based on users requirement
             string dt = config.InstanceTime.ToString(dtFormat);
@@ -615,6 +618,9 @@ namespace SwitchWinClock
             //now lets check and if exists still, lets replace it with the timezoneID
             if (dt.Contains(@"{id}"))
                 dt = dt.Replace(@"{id}", config.InstanceTimeZone.Id);
+
+            if (dt.Contains(@"{dtst}"))
+                dt = dt.Replace(@"{dtst}", config.InstanceTimeZone.IsDaylightSavingTime ? "DT" : "ST");
 
             SizeF textSize = e.Graphics.MeasureString(dt, ft);
             Size sz = new Size(this.ClientSize.Width - dblPad, this.ClientSize.Height - dblPad);
