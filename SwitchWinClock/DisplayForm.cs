@@ -40,11 +40,8 @@ namespace SwitchWinClock
         /// TODO: Future make this more dynamic based on single character Font Max size when set and to set Form width.
         /// </summary>
         private static int FontAllowDiff { get; set; } = 30;
-        /// <summary>
-        /// TODO: Future make this more dynamic based on single character Font Max size when set and to set Form width.
-        /// </summary>
-        //private static int FormAllowDiff { get; set; } = 20;
-
+        
+        ///changes based on time format
         private int m_waitTimer = 60000;  //default: 1 min
 
         public DisplayForm()
@@ -507,7 +504,7 @@ namespace SwitchWinClock
                         AvailableInstanceMenuItem.DropDownItems.Add(tsmi);
                     }
                 }
-                else if (fi.Exists && fi.LastWriteTimeUtc < DateTime.UtcNow.AddSeconds(-Global.MaxImAliveSeconds))
+                else if (!Global.AppID.Equals(id) && fi.Exists)
                 {
                     othersRunning = true;
                 }
