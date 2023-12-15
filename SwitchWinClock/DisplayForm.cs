@@ -872,9 +872,11 @@ namespace SwitchWinClock
         }
         private void BackColorSetMenuItem_Click(object sender, EventArgs e)
         {
-            Color defColor = config.BackColor;
-            if (PickColor(defColor, out Color retColor))
+            if (PickColor(config.BackColor, out Color retColor))
+            {
                 config.BackColor = retColor;
+                BackColorTransparentMenuItem.Checked = false;
+            }
         }
         private bool PickColor(Color color, out Color retColor)
         {

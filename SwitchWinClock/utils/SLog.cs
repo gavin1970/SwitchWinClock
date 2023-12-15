@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 
 namespace SwitchWinClock.utils
 {
@@ -160,7 +161,21 @@ namespace SwitchWinClock.utils
 
                     //could open the file up front and leave it open, but don't
                     //figure that we need that much logged all the time.
-                    File.AppendAllText(fileName, msg);
+                    int attempts = 3;
+                    while (attempts-- >= 0)
+                    {
+                        try
+                        {
+                            File.AppendAllText(fileName, msg);
+                            break;
+                        }
+                        catch
+                        {
+                            //lets try 3 times, possible file was
+                            //being access by another instance.
+                            Thread.Sleep(100);
+                        }
+                    }
                 }
             }
         }
