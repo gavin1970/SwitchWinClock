@@ -2,6 +2,9 @@
 
 With the use of [TruTimeZones](https://github.com/gavin1970/TruTimeZones) This is a very dynamic desktop clock.  Create up to 10 instances of it, each under a different timezones.  Completely custom date/time formatting.
 
+## Demo
+[Youtube Demo](https://youtu.be/ZKZl6tONPa8)
+
 ## Build with
 - Visual Studio 2022 Professional
 
