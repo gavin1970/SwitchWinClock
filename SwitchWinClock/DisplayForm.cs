@@ -579,6 +579,9 @@ namespace SwitchWinClock
             if (dtFormat.Contains("\\z"))
                 dtFormat = dtFormat.Replace("\\z", "#{¿}#");
 
+            if (dtFormat.Contains("{d}"))
+                dtFormat = dtFormat.Replace("{d}", "#{#}#");
+
             if (dtFormat.Contains("z"))
             {
                 TimeSpan tzOffSet = config.InstanceTimeZone.IsDaylightSavingTime ? config.InstanceTimeZone.DSTUtcOffset : config.InstanceTimeZone.BaseUtcOffset;
@@ -618,6 +621,16 @@ namespace SwitchWinClock
 
             if (dt.Contains(@"{dtst}"))
                 dt = dt.Replace(@"{dtst}", config.InstanceTimeZone.IsDaylightSavingTime ? "DT" : "ST");
+
+            if (dt.Contains(@"{w}"))
+                dt = dt.Replace("{w}", Global.GetIso8601WeekOfYear(config.InstanceTime).ToString());
+
+            if (dt.Contains("#{#}#"))
+            {
+                var newDate = new DateTime(config.InstanceTime.Year, 1, 1);
+                var dateDiff = config.InstanceTime.Subtract(newDate);
+                dt = dt.Replace("#{#}#", dateDiff.TotalDays.ToString("0.00"));
+            }
 
             SizeF textSize = e.Graphics.MeasureString(dt, ft);
             Size sz = new Size(this.ClientSize.Width - dblPad, this.ClientSize.Height - dblPad);

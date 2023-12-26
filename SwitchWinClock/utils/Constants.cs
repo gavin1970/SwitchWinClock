@@ -24,7 +24,9 @@ namespace SwitchWinClock.utils
         public const string z_hhmmss_tt = "(z) hh:mm:ss tt";
         public const string zz_hhmmss_tt = "(zz) hh:mm:ss tt";
         public const string zzz_hhmmss_tt = "(zzz) hh:mm:ss tt";
-        public const string zzzz_id = "(zzzz) - {id}";
+        public const string zzzz_HHmmss = "(zzzz) - HH:mm:ss";
+        public const string id = "\\Di\\spla\\y I\\D: - {id}";
+        public const string week_day = "Cal Week: {w}, Cal Da\\y: {d}";
         public const string dtst = @"DST or S\tan\dar\d Ti\me: {dtst}";
         public const string Text_hhmmss = @"Cu\s\to\m \tex\t exa\mple: hh:mm:ss";
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using TruTimeZones;
 
@@ -37,6 +38,25 @@ namespace SwitchWinClock.utils
         {
             TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneInfo.Local.Id);
             return SCConfig.GetTimeZones().First(f => f.Id == tzi.Id);
+        }
+        /// <summary>
+        /// This presumes that weeks start with Monday.<br/>
+        /// Week 1 is the 1st week of the year with a Thursday in it.<br/>
+        /// <a href="https://stackoverflow.com/questions/11154673/get-the-correct-week-number-of-a-given-date"></a>
+        /// </summary>
+        /// <param name="dateTime">Date to count from.</param>
+        /// <returns></returns>
+        public static int GetIso8601WeekOfYear(DateTime dateTime)
+        {
+            // Seriously cheat.  If its Monday, Tuesday or Wednesday, then it'll 
+            // be the same week# as whatever Thursday, Friday or Saturday are,
+            // and we always get those right
+            DayOfWeek day = CultureInfo.InvariantCulture.Calendar.GetDayOfWeek(dateTime);
+            if (day >= DayOfWeek.Monday && day <= DayOfWeek.Wednesday)
+                dateTime = dateTime.AddDays(3);
+
+            // Return the week of our adjusted day
+            return CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(dateTime, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
         }
     }
 }
