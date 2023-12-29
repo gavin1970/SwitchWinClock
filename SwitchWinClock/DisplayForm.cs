@@ -554,6 +554,7 @@ namespace SwitchWinClock
             Color fColor = config.ForeColor;
             int depth = config.TextBorderDepth;
             int dblPad = (depth * 2);
+            depth += (int)Math.Round(depth * 1.2, 0);
 
             Font ft = config.Font;
             switch (ft.Unit)
@@ -657,6 +658,7 @@ namespace SwitchWinClock
             }; //GetTextAlignment();
 
             DrawForm(g, this.ClientSize);
+            var rect = new RectangleF(0, 0, sz.Width, sz.Height);
 
             if (config.ClockStyle == Clock_Style.Border)
             {
@@ -666,7 +668,7 @@ namespace SwitchWinClock
                     fontObject.Outline = new Pen(config.TextBorderColor, depth);
                     fontObject.FillColor = config.ForeColor;
 
-                    CanvasPaint(e, fontObject);
+                    CanvasPaint(e, fontObject, rect);
                 };
             }
             else
@@ -674,39 +676,67 @@ namespace SwitchWinClock
                 //########################################
                 //NOTE: The depth and shadow was in the same loop.  This caused paint issues with some fonts.  Splitting them up, resolved that issue.
                 //########################################
-                //if (config.ClockStyle == Clock_Style.Shadowed || config.ClockStyle == Clock_Style.Depth_Shadowed)
                 if ((config.ClockStyle & Clock_Style.Shadowed) > 0)
                 {
+                    var newRect = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height);
                     for (int i = 1; i <= depth; i++)
-                        g.DrawString(dt, ft, new SolidBrush(ShadowColor), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
+                    {
+                        float move = (float)(i * .1);
+                        newRect = new RectangleF(newRect.X + move, newRect.Y + move, sz.Width, sz.Height);
+                        using (FontObject fontObject = new FontObject(dt, ft))
+                        {
+                            fontObject.FillColor = ShadowColor;
+                            fontObject.Outlined = true;
+                            fontObject.Outline.Color = ShadowColor;
+                            CanvasPaint(e, fontObject, newRect);
+                        };
+
+                        //g.DrawString(dt, ft, new SolidBrush(ShadowColor), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
+                    }
                 }
 
                 if ((config.ClockStyle & Clock_Style.Depth) > 0)
                 {
+                    var newRect = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height);
                     for (int i = 1; i <= depth; i++)
-                        g.DrawString(dt, ft, new SolidBrush(DepthColor), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
+                    {
+                        float move = (float)(i * .1);
+                        newRect = new RectangleF(newRect.X - move, newRect.Y - move, sz.Width, sz.Height);
+                        using (FontObject fontObject = new FontObject(dt, ft))
+                        {
+                            fontObject.FillColor = DepthColor;
+                            fontObject.Outlined = true;
+                            fontObject.Outline.Color = DepthColor;
+                            CanvasPaint(e, fontObject, newRect);
+                        };
+                        //g.DrawString(dt, ft, new SolidBrush(DepthColor), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
+                    }
                 }
 
-                //########################################
-                //NOTE: This will be removed once the above has been running for a while.
-                //########################################
-                //for (int i = 1; i <= depth; i++)
-                //{
-                //    if (config.ClockStyle == Clock_Style.Depth)
-                //        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
-                //    else if (config.ClockStyle == Clock_Style.Shadowed)
-                //        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
-                //    else
-                //    {
-                //        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, bColor, bColor, bColor)), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
-                //        g.DrawString(dt, ft, new SolidBrush(Color.FromArgb(255, tColor, tColor, tColor)), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
-                //    }
-                //}
+                if (!string.IsNullOrWhiteSpace(config.FontImagePath))
+                {
+                    using (FontObject fontObject = new FontObject(dt, ft))
+                    {
+                        fontObject.Outlined = false;
+                        fontObject.FillColor = Color.Empty;
+                        CanvasPaint(e, fontObject, rect);
+                    };
+                }
+                else
+                {
+                    using (FontObject fontObject = new FontObject(dt, ft))
+                    {
+                        fontObject.Outlined = false;
+                        fontObject.Outline = new Pen(config.TextBorderColor, depth);
+                        fontObject.FillColor = config.ForeColor;
 
-                g.DrawString(dt, ft, new SolidBrush(fColor), new Rectangle(0, 0, sz.Width, sz.Height), sFormat);
+                        CanvasPaint(e, fontObject, rect);
+                    };
+                    //g.DrawString(dt, ft, new SolidBrush(fColor), rect, sFormat);
+                }
             }
         }
-        private void CanvasPaint(PaintEventArgs e, FontObject fontObject)
+        private void CanvasPaint(PaintEventArgs e, FontObject fontObject, RectangleF rect)
         {
             using (var path = new GraphicsPath())
             using (var format = new StringFormat())
@@ -715,14 +745,21 @@ namespace SwitchWinClock
                 format.LineAlignment = StringAlignment.Center; //As selected
 
                 //float f = e.Graphics.DpiY * fontObject.SizeInPixels / 72f;
-                //fontObject.SizeInEms
-                path.AddString(fontObject.Text, fontObject.FontFamily, (int)fontObject.FontStyle, fontObject.SizeInPoints, this.ClientRectangle, format);
+                path.AddString(fontObject.Text, fontObject.FontFamily, (int)fontObject.FontStyle, fontObject.SizeInPoints, rect, format);
 
                 if (fontObject.Outlined)
                     e.Graphics.DrawPath(fontObject.Outline, path);
 
-                using (var brush = new SolidBrush(fontObject.FillColor))
-                    e.Graphics.FillPath(brush, path);
+                if (fontObject.FillColor == Color.Empty && !string.IsNullOrWhiteSpace(config.FontImagePath))
+                {
+                    Brush gbrush = new TextureBrush(config.FontImage);
+                    e.Graphics.FillPath(gbrush, path);
+                }
+                else
+                {
+                    using (var brush = new SolidBrush(fontObject.FillColor))
+                        e.Graphics.FillPath(brush, path);
+                }
             }
         }
         private void Form_MouseMove(object sender, MouseEventArgs e)
@@ -852,6 +889,7 @@ namespace SwitchWinClock
                     break;
                 case "ForeColorTransparentMenuItem":
                     config.ForeColor = Color.FromArgb(isTransparent, config.ForeColor.R, config.ForeColor.G, config.ForeColor.B);
+                    config.FontImagePath = "";
                     break;
                 case "TextBorderTransparentMenuItem":
                     config.TextBorderColor = Color.FromArgb(isTransparent, config.TextBorderColor.R, config.TextBorderColor.G, config.TextBorderColor.B);
@@ -943,6 +981,7 @@ namespace SwitchWinClock
             {
                 config.ForeColor = selColor;
                 ForeColorTransparentMenuItem.Checked = false;
+                config.FontImagePath = "";
             }
         }
         private void StyleDeptMenuItem_Click(object sender, EventArgs e)
@@ -1086,6 +1125,59 @@ namespace SwitchWinClock
         private void ExitAllMenuItem_Click(object sender, EventArgs e)
         {
             File.WriteAllText(ExitAll, DateTime.Now.ToString("ddd, MM/dd/yyyy HH:mm.ss.ffff"));
+        }
+        private void FontBGImageMenuItem_Click(object sender, EventArgs e)
+        {
+            var filePath = GetFileName("Pick image for font", "png,jpg,gif,bmp,*");
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                config.FontImagePath = filePath;
+                config.ForeColor = Color.Empty;
+            }
+        }
+        private string GetFileName(string title, string acceptedFileTypes = "txt,*", string intnalStartup = "")
+        {
+            if (string.IsNullOrWhiteSpace(intnalStartup))
+                intnalStartup = Path.GetDirectoryName(Application.ExecutablePath);
+
+            var arrFilter = acceptedFileTypes.Split(',');
+            var filePath = string.Empty;
+            var filter = "";
+
+            foreach (var ftype in arrFilter)
+            {
+                if (filter != "")
+                    filter += "|";
+
+                if (ftype.Equals("*"))
+                    filter += $"All files (*.*)|*.*";
+                else
+                    filter += $"{ftype} files (*.{ftype})|*.{ftype}";
+            }
+
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Title = title;
+                openFileDialog.AddExtension = true;
+                openFileDialog.CheckFileExists = true;
+                openFileDialog.Multiselect = false;
+                openFileDialog.InitialDirectory = intnalStartup;
+                openFileDialog.Filter = filter;
+                openFileDialog.FilterIndex = 2;
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    //Get the path of specified file
+                    filePath = openFileDialog.FileName;
+                    
+                    ////Read the contents of the file into a stream
+                    //var fileStream = openFileDialog.OpenFile();
+                    //using (StreamReader reader = new StreamReader(fileStream))
+                    //    fileContent = reader.ReadToEnd();
+                }
+            }
+            return filePath;
         }
     }
 }

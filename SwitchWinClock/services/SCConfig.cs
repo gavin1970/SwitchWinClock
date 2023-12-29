@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using SwitchWinClock.utils;
 using System.Linq;
 using TruTimeZones;
+using System.IO;
 
 namespace SwitchWinClock
 {
@@ -46,6 +47,8 @@ namespace SwitchWinClock
         private bool _ManualWinAlignment = true;
         private int _DeviceNumber = 1;
         private bool _AlwaysOnTop = false;
+        private string _FontImagePath = string.Empty;
+        private Image _FontImage = null;
         private DateTime _ImAlive = DateTime.UtcNow;
         private string _TimeZone = "";
 
@@ -241,6 +244,30 @@ namespace SwitchWinClock
                 Update();
             }
         }
+        public Image FontImage { get { return _FontImage; } }
+        public string FontImagePath
+        {
+            get 
+            {
+                //validate file still exists.
+                if (!string.IsNullOrWhiteSpace(_FontImagePath) && File.Exists(_FontImagePath) && _FontImage == null)
+                    _FontImage = Image.FromFile(_FontImagePath);
+                else if (string.IsNullOrWhiteSpace(_FontImagePath) || !File.Exists(_FontImagePath))
+                {
+                    _FontImagePath = string.Empty;
+                    _FontImage = null;
+                }
+
+                return _FontImagePath;
+            }
+            set
+            {
+                _FontImagePath = value;
+                Log.WriteLine(SMsgType.Information, $"[ColNames.FontImagePath] = {_FontImagePath}");
+                Update();
+            }
+        }
+
         public void ImAlive()
         {
             if (_DataTable?.Rows.Count == 1)
@@ -331,6 +358,7 @@ namespace SwitchWinClock
                 _WinAlignment = _jSON.GetColumn<ContentAlignment>(dRow, ColNames.WinAlignment, _WinAlignment);
                 _DeviceNumber = _jSON.GetColumn<int>(dRow, ColNames.DeviceNumber, _DeviceNumber);
                 _AlwaysOnTop = _jSON.GetColumn<bool>(dRow, ColNames.AlwaysOnTop, _AlwaysOnTop);
+                _FontImagePath = _jSON.GetColumn<string>(dRow, ColNames.FontImagePath, _FontImagePath);
                 _ImAlive = _jSON.GetColumn<DateTime>(dRow, ColNames.ImAlive, _ImAlive);
                 _TimeZone = _jSON.GetColumn<string>(dRow, ColNames.TimeZone, _TimeZone);
             }
@@ -381,6 +409,7 @@ namespace SwitchWinClock
             dRow[ColNames.WinAlignment] = _WinAlignment;
             dRow[ColNames.DeviceNumber] = _DeviceNumber;
             dRow[ColNames.AlwaysOnTop] = _AlwaysOnTop;
+            dRow[ColNames.FontImagePath] = _FontImagePath;
             dRow[ColNames.ImAlive] = _ImAlive;
             dRow[ColNames.TimeZone] = _TimeZone;
 
@@ -390,6 +419,9 @@ namespace SwitchWinClock
             _jSON.UpdateTable(_DataTable);
             Log.WriteLine(SMsgType.Debug, "Update Complete...");
         }
+        /// <summary>
+        /// Only creates the table and will add columns that might be missing.
+        /// </summary>
         private void CreateDataTable()
         {
             Log.WriteLine(SMsgType.Information, $"Creating table: {SETTINGS_TABLE} for ({Global.AppID})...");
@@ -425,13 +457,21 @@ namespace SwitchWinClock
                 _DataTable.Columns.Add(new DataColumn(ColNames.DeviceNumber, typeof(int)));
             if (!_DataTable.Columns.Contains(ColNames.AlwaysOnTop))
                 _DataTable.Columns.Add(new DataColumn(ColNames.AlwaysOnTop, typeof(bool)));
+            if (!_DataTable.Columns.Contains(ColNames.FontImagePath))
+                _DataTable.Columns.Add(new DataColumn(ColNames.FontImagePath, typeof(string)));
             if (!_DataTable.Columns.Contains(ColNames.ImAlive))
                 _DataTable.Columns.Add(new DataColumn(ColNames.ImAlive, typeof(DateTime)));
             if (!_DataTable.Columns.Contains(ColNames.TimeZone))
                 _DataTable.Columns.Add(new DataColumn(ColNames.TimeZone, typeof(string)));
-            
+
+
             Log.WriteLine(SMsgType.Information, $"Created table: {SETTINGS_TABLE} for ({Global.AppID})...");
         }
+        /// <summary>
+        /// Checks all colors in code.  If a column is missing, it will 
+        /// return false and CreateTable will add the missing column.
+        /// </summary>
+        /// <returns></returns>
         private bool ValidColums()
         {
             bool retVal = true;

@@ -60,6 +60,7 @@ namespace SwitchWinClock.utils
         public const string AlwaysOnTop = "AlwaysOnTop";
         public const string ImAlive = "ImAlive";
         public const string TimeZone = "TimeZone";
+        public const string FontImagePath = "FontImagePath";
 
         internal static FieldInfo[] GetFields
         { 
