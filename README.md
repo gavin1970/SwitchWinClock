@@ -33,5 +33,5 @@ Coming..
 - [NuGet Package]<!--(https://www.nuget.org/packages/SwitchWinClock)-->
 - [Release Notes]<!--(https://github.com/gavin1970/SwitchWinClock/releases)-->
 - [Contributing Guidelines]<!--(https://github.com/gavin1970/SwitchWinClock/blob/master/CONTRIBUTING.md)-->
-- [License](https://github.com/gavin1970/TruTimeZones/blob/master/LICENSE.md)
+- [License]<!--(https://github.com/gavin1970/SwitchWinClock/blob/master/LICENSE.md)-->
 - [Stack Overflow](https://stackoverflow.com/questions/tagged/SwitchWinClock)
