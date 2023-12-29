@@ -10,7 +10,6 @@ please let us know in Issues portion or on [Stack Overflow](https://stackoverflo
 
 Display of Options:
 <img src="https://github.com/gavin1970/SwitchWinClock/blob/master/SwitchWinClock/imgs/2023-12-29_16-39-24.png" alt="Example"/>
-[]
 
 ## Demo
 [Youtube Demo](https://youtu.be/ZKZl6tONPa8)
