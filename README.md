@@ -6,7 +6,7 @@ Create up to 10 instances and each under a different timezones.  Completely cust
 Has background colors/images, depth, shadows, & borders.  Abilities to show Calendar Week # and Day of Year #.  Custom writing with the date and or time to display.
 
 Request a change, can quickly be added.  Find an issue, 
-please let us know in Issues portion or on [Stack Overflow](https://stackoverflow.com/questions/tagged/TruTimeZones)..
+please let us know in Issues portion or on [Stack Overflow](https://stackoverflow.com/questions/tagged/SwitchWinClock)..
 
 Display of Options:
 <img src="https://github.com/gavin1970/SwitchWinClock/blob/master/SwitchWinClock/imgs/2023-12-29_16-39-24.png" alt="Example"/>
@@ -28,10 +28,10 @@ Coming..
 
 ## Links
 
-- [Homepage]<!--(http://www.chizl.com/TruTimeZones)-->
-- [Documentation]<!--(http://www.chizl.com/TruTimeZones/help)-->
-- [NuGet Package]<!--(https://www.nuget.org/packages/TruTimeZones)-->
-- [Release Notes]<!--(https://github.com/gavin1970/TruTimeZones/releases)-->
-- [Contributing Guidelines]<!--(https://github.com/gavin1970/TruTimeZones/blob/master/CONTRIBUTING.md)-->
+- [Homepage]<!--(http://www.chizl.com/SwitchWinClock)-->
+- [Documentation]<!--(http://www.chizl.com/SwitchWinClock/help)-->
+- [NuGet Package]<!--(https://www.nuget.org/packages/SwitchWinClock)-->
+- [Release Notes]<!--(https://github.com/gavin1970/SwitchWinClock/releases)-->
+- [Contributing Guidelines]<!--(https://github.com/gavin1970/SwitchWinClock/blob/master/CONTRIBUTING.md)-->
 - [License](https://github.com/gavin1970/TruTimeZones/blob/master/LICENSE.md)
-- [Stack Overflow](https://stackoverflow.com/questions/tagged/TruTimeZones)
+- [Stack Overflow](https://stackoverflow.com/questions/tagged/SwitchWinClock)
