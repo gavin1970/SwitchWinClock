@@ -263,6 +263,8 @@ namespace SwitchWinClock
             set
             {
                 _FontImagePath = value;
+                if(!string.IsNullOrWhiteSpace(_FontImagePath) && File.Exists(_FontImagePath))
+                    _FontImage = Image.FromFile(_FontImagePath);
                 Log.WriteLine(SMsgType.Information, $"[ColNames.FontImagePath] = {_FontImagePath}");
                 Update();
             }

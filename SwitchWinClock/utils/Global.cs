@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using TruTimeZones;
@@ -11,6 +12,9 @@ namespace SwitchWinClock.utils
         public const string DefaultInstanceName = "Unknown";
         public const int MaxImAliveSeconds = 10;
         public static bool ShowedTimeZone = false;
+        //custom empty, because of Color Picker, will auto select
+        //Black, so if Black is selected, it thinks there is no change.
+        public static Color EmptyColor { get; } = Color.FromArgb(0, 0, 1, 0);
 
         public static string ConfigFileName { get { return $"SWClock{AppID:00}.config"; } }
         public static int AppID { get; set; }

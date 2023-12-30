@@ -12,7 +12,6 @@ using System.Drawing.Drawing2D;
 using System.Text.RegularExpressions;
 using SwitchWinClock.utils;
 using TruTimeZones;
-using System.Collections.Generic;
 
 namespace SwitchWinClock
 {
@@ -27,7 +26,6 @@ namespace SwitchWinClock
         delegate void VoidDelegate();
         private static bool m_closingForm = false;
 
-        private readonly Font ButtonFont = new Font("Arial Black", 10F, FontStyle.Regular, GraphicsUnit.Pixel);
         private readonly SCConfig config = new SCConfig();
         private readonly Screen[] m_allScreens = Screen.AllScreens;
         const string ExitAll = ".\\exitAll";
@@ -399,8 +397,9 @@ namespace SwitchWinClock
             this.TextDepthpMenuItem.Text = this.StyleBorderMenuItem.Checked ? MenuText.TextBorderText : MenuText.TextDepthText;
             this.BackColorTransparentMenuItem.Checked = config.BackColor.A == 0;
             this.BorderColorTransparentMenuItem.Checked = config.FormBorderColor.A == 0;
-            this.ForeColorTransparentMenuItem.Checked = config.ForeColor.A == 0;
+            this.ForeColorTransparentMenuItem.Checked = config.ForeColor.A == 0 && string.IsNullOrWhiteSpace(config.FontImagePath);
             this.TextBorderTransparentMenuItem.Checked = config.TextBorderColor.A == 0;
+            this.FontBGImageMenuItem.Checked = !string.IsNullOrWhiteSpace(config.FontImagePath);
 
             this.AlwaysOnTopMenuItem.Checked = config.AlwaysOnTop;
             this.TopMost = config.AlwaysOnTop;
@@ -554,7 +553,9 @@ namespace SwitchWinClock
             Color fColor = config.ForeColor;
             int depth = config.TextBorderDepth;
             int dblPad = (depth * 2);
-            depth += (int)Math.Round(depth * 1.2, 0);
+            
+            if (!string.IsNullOrWhiteSpace(config.FontImagePath))
+                depth += (int)Math.Round(depth * 1.2, 0);
 
             Font ft = config.Font;
             switch (ft.Unit)
@@ -679,38 +680,49 @@ namespace SwitchWinClock
                 if ((config.ClockStyle & Clock_Style.Shadowed) > 0)
                 {
                     var newRect = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height);
-                    for (int i = 1; i <= depth; i++)
+                    using (FontObject fontObject = new FontObject(dt, ft))
                     {
-                        float move = (float)(i * .1);
-                        newRect = new RectangleF(newRect.X + move, newRect.Y + move, sz.Width, sz.Height);
-                        using (FontObject fontObject = new FontObject(dt, ft))
+                        for (int i = 1; i <= depth; i++)
                         {
-                            fontObject.FillColor = ShadowColor;
-                            fontObject.Outlined = true;
-                            fontObject.Outline.Color = ShadowColor;
-                            CanvasPaint(e, fontObject, newRect);
-                        };
-
-                        //g.DrawString(dt, ft, new SolidBrush(ShadowColor), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
-                    }
+                            //this is done this way, because it's slower than DrawString and causes the
+                            //CPU to spike.  So only using it for Images.  It also is sized differently.
+                            if (!string.IsNullOrWhiteSpace(config.FontImagePath))
+                            {
+                                float move = (float)(i * .1);
+                                newRect = new RectangleF(newRect.X + move, newRect.Y + move, sz.Width, sz.Height);
+                                fontObject.FillColor = ShadowColor;
+                                fontObject.Outlined = true;
+                                fontObject.Outline.Color = ShadowColor;
+                                CanvasPaint(e, fontObject, newRect);
+                            }
+                            else
+                                g.DrawString(dt, ft, new SolidBrush(ShadowColor), new Rectangle(i, i, sz.Width, sz.Height), sFormat);
+                        }
+                    };
                 }
 
                 if ((config.ClockStyle & Clock_Style.Depth) > 0)
                 {
                     var newRect = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height);
-                    for (int i = 1; i <= depth; i++)
+                    using (FontObject fontObject = new FontObject(dt, ft))
                     {
-                        float move = (float)(i * .1);
-                        newRect = new RectangleF(newRect.X - move, newRect.Y - move, sz.Width, sz.Height);
-                        using (FontObject fontObject = new FontObject(dt, ft))
+                        for (int i = 1; i <= depth; i++)
                         {
-                            fontObject.FillColor = DepthColor;
-                            fontObject.Outlined = true;
-                            fontObject.Outline.Color = DepthColor;
-                            CanvasPaint(e, fontObject, newRect);
-                        };
-                        //g.DrawString(dt, ft, new SolidBrush(DepthColor), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
-                    }
+                            //this is done this way, because it's slower than DrawString and causes the
+                            //CPU to spike.  So only using it for Images.  It also is sized differently.
+                            if (!string.IsNullOrWhiteSpace(config.FontImagePath))
+                            {
+                                float move = (float)(i * .1);
+                                newRect = new RectangleF(newRect.X - move, newRect.Y - move, sz.Width, sz.Height);
+                                fontObject.FillColor = DepthColor;
+                                fontObject.Outlined = true;
+                                fontObject.Outline.Color = DepthColor;
+                                CanvasPaint(e, fontObject, newRect);
+                            }
+                            else
+                                g.DrawString(dt, ft, new SolidBrush(DepthColor), new Rectangle(-i, -i, sz.Width, sz.Height), sFormat);
+                        }
+                    };
                 }
 
                 if (!string.IsNullOrWhiteSpace(config.FontImagePath))
@@ -718,21 +730,30 @@ namespace SwitchWinClock
                     using (FontObject fontObject = new FontObject(dt, ft))
                     {
                         fontObject.Outlined = false;
-                        fontObject.FillColor = Color.Empty;
+                        fontObject.FillColor = Global.EmptyColor;
                         CanvasPaint(e, fontObject, rect);
                     };
                 }
                 else
                 {
-                    using (FontObject fontObject = new FontObject(dt, ft))
+                    //this is done this way, because it's slower than DrawString and causes the
+                    //CPU to spike.  So only using it for Images.  It also is sized differently.
+                    if (!string.IsNullOrWhiteSpace(config.FontImagePath))
                     {
-                        fontObject.Outlined = false;
-                        fontObject.Outline = new Pen(config.TextBorderColor, depth);
-                        fontObject.FillColor = config.ForeColor;
+                        using (FontObject fontObject = new FontObject(dt, ft))
+                        {
+                            fontObject.Outlined = false;
+                            fontObject.Outline = new Pen(config.TextBorderColor, depth);
+                            fontObject.FillColor = config.ForeColor;
 
-                        CanvasPaint(e, fontObject, rect);
-                    };
-                    //g.DrawString(dt, ft, new SolidBrush(fColor), rect, sFormat);
+                            CanvasPaint(e, fontObject, rect);
+                        };
+                    }
+                    else
+                    {
+                        var filler = fColor.A == 0 ? this.TransparencyKey : fColor;
+                        g.DrawString(dt, ft, new SolidBrush(filler), rect, sFormat);
+                    }
                 }
             }
         }
@@ -743,21 +764,21 @@ namespace SwitchWinClock
             {
                 format.Alignment = StringAlignment.Center; //As selected
                 format.LineAlignment = StringAlignment.Center; //As selected
-
                 //float f = e.Graphics.DpiY * fontObject.SizeInPixels / 72f;
-                path.AddString(fontObject.Text, fontObject.FontFamily, (int)fontObject.FontStyle, fontObject.SizeInPoints, rect, format);
+                path.AddString(fontObject.Text, fontObject.FontFamily, fontObject.FontStyle.ToInt(), fontObject.SizeInPoints, rect, format);
 
                 if (fontObject.Outlined)
                     e.Graphics.DrawPath(fontObject.Outline, path);
 
-                if (fontObject.FillColor == Color.Empty && !string.IsNullOrWhiteSpace(config.FontImagePath))
+                if (fontObject.FillColor == Global.EmptyColor && !string.IsNullOrWhiteSpace(config.FontImagePath))
                 {
                     Brush gbrush = new TextureBrush(config.FontImage);
                     e.Graphics.FillPath(gbrush, path);
                 }
                 else
                 {
-                    using (var brush = new SolidBrush(fontObject.FillColor))
+                    Color filler = fontObject.FillColor.A == 0 ? this.TransparencyKey : fontObject.FillColor;
+                    using (var brush = new SolidBrush(filler))
                         e.Graphics.FillPath(brush, path);
                 }
             }
@@ -923,13 +944,13 @@ namespace SwitchWinClock
         }
         private void BackColorSetMenuItem_Click(object sender, EventArgs e)
         {
-            if (PickColor(config.BackColor, out Color retColor))
+            if (ColorPicker(config.BackColor, out Color retColor))
             {
                 config.BackColor = retColor;
                 BackColorTransparentMenuItem.Checked = false;
             }
         }
-        private bool PickColor(Color color, out Color retColor)
+        private bool ColorPicker(Color color, out Color retColor)
         {
             bool retVal = false;
             retColor = color;
@@ -937,7 +958,8 @@ namespace SwitchWinClock
             using (ColorDialog cd = new ColorDialog())
             {
                 cd.FullOpen = true;
-                cd.Color = color;
+                if (color.A == 0)
+                    cd.Color = Global.EmptyColor;
                 cd.AnyColor = true;
                 cd.AllowFullOpen = true;
                 cd.ShowHelp = true;
@@ -952,7 +974,7 @@ namespace SwitchWinClock
         }
         private void BorderColorSetMenuItem_Click(object sender, EventArgs e)
         {
-            if(PickColor(config.FormBorderColor, out Color selColor))
+            if(ColorPicker(config.FormBorderColor, out Color selColor))
             {
                 config.FormBorderColor = selColor;
                 BorderColorTransparentMenuItem.Checked = false;
@@ -977,11 +999,12 @@ namespace SwitchWinClock
         }
         private void ForeColorSetMenuItem_Click(object sender, EventArgs e)
         {
-            if (PickColor(config.ForeColor, out Color selColor))
+            if (ColorPicker(config.ForeColor, out Color selColor))
             {
                 config.ForeColor = selColor;
                 ForeColorTransparentMenuItem.Checked = false;
                 config.FontImagePath = "";
+                this.FontBGImageMenuItem.Checked = false;
             }
         }
         private void StyleDeptMenuItem_Click(object sender, EventArgs e)
@@ -1029,7 +1052,7 @@ namespace SwitchWinClock
         }
         private void TextBorderSetColorMenuItem_Click(object sender, EventArgs e)
         {
-            if (PickColor(config.TextBorderColor, out Color selColor))
+            if (ColorPicker(config.TextBorderColor, out Color selColor))
             {
                 config.TextBorderColor = selColor;
                 TextBorderTransparentMenuItem.Checked = false;
@@ -1131,8 +1154,25 @@ namespace SwitchWinClock
             var filePath = GetFileName("Pick image for font", "png,jpg,gif,bmp,*");
             if (!string.IsNullOrWhiteSpace(filePath))
             {
-                config.FontImagePath = filePath;
-                config.ForeColor = Color.Empty;
+                try
+                {
+                    if (!Path.GetDirectoryName(filePath).Equals(Path.GetDirectoryName(Application.ExecutablePath)))
+                    {
+                        var fileName = $"./{Path.GetFileName(filePath)}";
+                        if (File.Exists(fileName))
+                            File.Delete(fileName);
+
+                        File.Copy(filePath, fileName);
+                    }
+                }
+                finally
+                {
+                    config.FontImagePath = filePath;
+                    config.ForeColor = Global.EmptyColor;
+                    this.FontBGImageMenuItem.Checked = true;
+                    this.ForeColorSetMenuItem.Checked = false;
+                    this.ForeColorTransparentMenuItem.Checked = false;
+                }
             }
         }
         private string GetFileName(string title, string acceptedFileTypes = "txt,*", string intnalStartup = "")
@@ -1163,7 +1203,7 @@ namespace SwitchWinClock
                 openFileDialog.Multiselect = false;
                 openFileDialog.InitialDirectory = intnalStartup;
                 openFileDialog.Filter = filter;
-                openFileDialog.FilterIndex = 2;
+                openFileDialog.FilterIndex = 1;
                 openFileDialog.RestoreDirectory = true;
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
