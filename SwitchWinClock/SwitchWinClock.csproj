@@ -139,6 +139,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="imgs\2023-12-29_16-39-24.png" />
+    <Content Include="imgs\2023-12-29_20-31-23.png" />
+    <Content Include="imgs\2023-12-29_20-31-46.png" />
+    <Content Include="imgs\2023-12-29_20-31-59.png" />
     <Content Include="switch.ico" />
   </ItemGroup>
   <ItemGroup />
