@@ -8,8 +8,12 @@ Has background colors/images, depth, shadows, & borders.  Abilities to show Cale
 Request a change, can quickly be added.  Find an issue, 
 please let us know in Issues portion or on [Stack Overflow](https://stackoverflow.com/questions/tagged/SwitchWinClock)..
 
-Display of Options:
-<img src="https://github.com/gavin1970/SwitchWinClock/blob/master/SwitchWinClock/imgs/2023-12-29_16-39-24.png" alt="Example"/>
+## Options and Examples:
+<img src="https://github.com/gavin1970/SwitchWinClock/blob/master/SwitchWinClock/imgs/2023-12-29_16-39-24.png" alt="Example 1"/>
+<img src="https://github.com/gavin1970/SwitchWinClock/blob/master/SwitchWinClock/imgs/2023-12-29_20-31-23.png" alt="Example 2"/>
+<img src="https://github.com/gavin1970/SwitchWinClock/blob/master/SwitchWinClock/imgs/2023-12-29_20-31-46.png" alt="Example 3"/>
+<img src="https://github.com/gavin1970/SwitchWinClock/blob/master/SwitchWinClock/imgs/2023-12-29_20-31-59.png" alt="Example 4"/>
+
 
 ## Demo
 [Youtube Demo](https://youtu.be/ZKZl6tONPa8)
