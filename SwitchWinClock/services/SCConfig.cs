@@ -314,7 +314,7 @@ namespace SwitchWinClock
                     if (TimeZone.Equals(tzs.Id))
                         _selectedTimeZone = tzs;
                     else
-                        _selectedTimeZone = GetTimeZones().First(f => f.Id == TimeZone);
+                        _selectedTimeZone = GetTimeZones().First(f => f.StandardName == TimeZone || f.DaylightName == TimeZone);
                 }
 
                 return DateTime.UtcNow.Add(_selectedTimeZone.IsDaylightSavingTime ? _selectedTimeZone.DSTUtcOffset : _selectedTimeZone.BaseUtcOffset);

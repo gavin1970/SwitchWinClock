@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("chizl.com")]
 [assembly: AssemblyProduct("SwitchWinClock")]
-[assembly: AssemblyCopyright("© 2023 chizl.com")]
+[assembly: AssemblyCopyright("© 2024 chizl.com")]
 [assembly: AssemblyTrademark("chizl.com ™")]
 [assembly: AssemblyCulture("")]
 
@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("23.12.0.0")]
-[assembly: AssemblyFileVersion("23.12.30.138")]
-[assembly: AssemblyInformationalVersion("23.12.30.0")]
+[assembly: AssemblyVersion("4.3.0.0")]
+[assembly: AssemblyFileVersion("4.3.21.018")]
+[assembly: AssemblyInformationalVersion("4.3.21.0")]
 [assembly: AssemblyKeyFileAttribute("")]
 [assembly: AssemblyDelaySignAttribute(false)]

@@ -40,8 +40,7 @@ namespace SwitchWinClock.utils
         }
         public static TruTimeZone CurrentTimeZone()
         {
-            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneInfo.Local.Id);
-            return SCConfig.GetTimeZones().First(f => f.Id == tzi.Id);
+            return TimeZoneSearch.CurrentTimeZone();
         }
         /// <summary>
         /// This presumes that weeks start with Monday.<br/>
