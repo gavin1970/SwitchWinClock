@@ -332,7 +332,7 @@ namespace SwitchWinClock
                     if (TimeZone.Equals(tzs.Id))
                         _selectedTimeZone = tzs;
                     else
-                        _selectedTimeZone = GetTimeZones().First(f => f.Id == TimeZone);
+                        _selectedTimeZone = GetTimeZones().First(f => f.DaylightName == TimeZone || f.StandardName == TimeZone);
                 }
 
                 return _selectedTimeZone;
